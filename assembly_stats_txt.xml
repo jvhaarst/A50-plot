@@ -1,0 +1,53 @@
+<tool id="assemblystats" name="assemblystats" version="1.0.0">
+	<description>Summarise an assembly (e.g. N50 metrics)</description>
+	<command interpreter="python">
+	  assembly_stats_txt.py
+           '$type' '$stats.extra_files_path'
+           '$type'
+           '$bucket'
+	   '$input'
+   	    '$stats'
+    '$sortedcontigs'
+    '$histogrampng'
+    '$summedcontigspng'
+    '$histogramdata'
+    '$summedcontigdata'
+
+	</command>
+        <inputs>
+          <param label="Type of read" name="type" type="select" help="Is this from an genomic (contig) or transcriptomic assembly (isotig) or are these raw reads (read)">
+                        <option value="contig" selected="yes">Contig (if from genomic assembly)</option>
+                        <option value="isotig">Isotig (if from transcriptomic assembly)</option>
+			<option value="read">Raw reads from sequencer in FASTA format (useful for 454 data)</option>
+
+          </param>
+          <param name="bucket" type="boolean" label="Output histogram with bin sizes=1" truevalue="-b" falsevalue="" help="Use this to specify whether or not bin sizes of 1 should be used when plotting histograms"/>
+	 <param format="fasta" name="input" type="data" label="Source file in FASTA format"/>
+
+        </inputs>
+	<outputs>
+		 <data format="tabular" name="stats" label="Assembly statistics"/>
+		 <data format="fasta" name="sortedcontigs" label="Sorted contigs" />
+		<data format="png" name="histogrampng" label="Histogram of contig sizes"/>
+		<data format="png" name="summedcontigspng" label="Cumulative sum of contig sizes"/>
+		<data format="tabular" name="histogramdata" label="Histogram data"/>
+		<data format="tabular" name="summedcontigdata" label="Cumulative sum of contig size data"/>
+
+	</outputs>
+	<requirements>
+	</requirements>
+	<help>
+**Summarise assembly overview**
+
+This script is used to give summary statistics of an assembly or set of reads. Typically this is run after an assembly to evaluate gross features.
+
+
+# Gives back
+# - N50
+# - num of contigs > 1 kb
+# - num of contigs
+# - Read or Contig Histogram and graphs.
+# - Summed contig length (by number of contigs, in sorted order)
+	</help>
+
+</tool>
