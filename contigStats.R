@@ -87,7 +87,64 @@ contigStats <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentag
                 theme(legend.title = element_text(size = 0))
         }
 }
+contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, xlim, ylim) {
+        ## Compute cumulative length vectors for contig sets
+        Nl <- lapply(names(N), function(x) rev(sort(N[[x]]))); names(Nl) <- names(N)
+        Nlcum <- lapply(names(Nl), function(x) cumsum(Nl[[x]])); names(Nlcum) <- names(Nl)
 
+        ## Compute N50 values
+        N50 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x]/2 >= 0)[1]])
+        names(N50) <- names(N)
+
+        ## Return only data (no plot)
+        if(style=="data") {
+                N90 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.90 >= 0)[1]]); names(N50) <- names(N)
+                N75 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.75 >= 0)[1]]); names(N50) <- names(N)
+                N25 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.25 >= 0)[1]]); names(N50) <- names(N)
+                stats <- cbind(
+                		N25, N50, N75, N90, 
+                		Longest=sapply(N, max), Shortest=sapply(N, min), 
+                		Mean=round(sapply(N, mean)), Median=round(sapply(N, median)),
+                		N_Contigs=sapply(N, length), Total_length=sapply(N, sum)
+                		)
+                return(Contig_Stats=list(stats))
+        }
+        ## Plot cumulative contig length with base graphics, only necessary when ggplot is unavailable
+	if(style=="base") {
+            if(missing(xlim)) xlim <- c(0, max(unlist(N)))
+            if(missing(ylim)) ylim <- c(0, 100)
+            split.screen(c(1,1))
+            for(i in seq(along=Nl)) {
+                    if(i==1) {
+                    	plot(Nl[[i]],Nlcum[[i]]/reflength[[i]] * 100,  col=i, pch=pch, xlim=xlim, ylim=ylim, xlab=xlab, ylab=ylab, main=main)
+                    }
+                    screen(1, new=FALSE)
+                    	plot(Nl[[i]],Nlcum[[i]]/reflength[[i]] * 100,  col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", ylab="", xlab="", main="", bty="n")
+            }
+            legend("topright", legend=paste(names(N50), ": N50 = ", N50, sep=""), cex=1.2, bty="n", pch=15, pt.cex=1.8, col=seq(along=Nl))
+            close.screen(all=TRUE)
+        }
+        ## Plot cumulative contig length with ggplot2
+        ## Note: ggplot2 plotting options can be looked up with theme_get()
+	if(style=="ggplot2") {
+                require("ggplot2")
+                plotdf <- data.frame(Samples=rep(names(Nlcum), sapply(Nlcum, length)), length=unlist(Nl), perc=unlist(lapply(names(Nlcum), function(x) Nlcum[[x]]/reflength[[x]]*100)))
+                counts <- table(plotdf[,1]); counts <- counts[names(N50)]
+                N50rep <- paste(plotdf[,1], ": N50=", unlist(lapply(as.character(unique(plotdf[,1])), function(x) rep(N50[x], counts[names(N50[x])]))), sep="")
+                plotdf[,1] <- N50rep
+                ggplot(plotdf, aes(perc, length, color=Samples)) +
+                geom_point() +
+                geom_line() +
+                scale_x_continuous(xlab) +
+                scale_y_continuous(ylab) +
+                labs(title = main) +
+                theme(plot.title = element_text(size = sizetitle)) +
+                theme(axis.title.x = element_text(size = sizex)) +
+                theme(axis.title.y = element_text(size = sizey, angle = 90)) +
+                theme(legend.text = element_text(size = sizelegend)) +
+                theme(legend.title = element_text(size = 0))
+        }
+}
 ## Usage of contigStats function
 ## Test sample of simulated contig length values provided in list
 # 
