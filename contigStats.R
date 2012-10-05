@@ -89,10 +89,10 @@ contigStats <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentag
 }
 contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, xlim, ylim) {
         ## Compute cumulative length vectors for contig sets
-        Nl <- lapply(names(N), function(x) rev(sort(N[[x]]))); names(Nl) <- names(N)
-        Nlcum <- lapply(names(Nl), function(x) cumsum(Nl[[x]])); names(Nlcum) <- names(Nl)
+        Nl    <- lapply(names(N),  function(x) rev(sort(N[[x]]))); names(Nl)    <- names(N)
+        Nlcum <- lapply(names(Nl), function(x) cumsum(Nl[[x]]));   names(Nlcum) <- names(Nl)
 
-        ## Compute N50 values
+        ## Compute N50 values for use on graph
         N50 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x]/2 >= 0)[1]])
         names(N50) <- names(N)
 
@@ -116,10 +116,10 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
             split.screen(c(1,1))
             for(i in seq(along=Nl)) {
                     if(i==1) {
-                    	plot(Nl[[i]],Nlcum[[i]]/reflength[[i]] * 100,  col=i, pch=pch, xlim=xlim, ylim=ylim, xlab=xlab, ylab=ylab, main=main)
+                    	plot(y=Nlcum[[i]]/reflength[[i]] * 100, x=seq_along(Nlcum[[i]]),col=i, pch=pch, xlim=xlim, ylim=ylim, xlab=xlab, ylab=ylab, main=main)
                     }
                     screen(1, new=FALSE)
-                    	plot(Nl[[i]],Nlcum[[i]]/reflength[[i]] * 100,  col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", ylab="", xlab="", main="", bty="n")
+                    plot(y=Nlcum[[i]]/reflength[[i]] * 100, x=seq_along(Nlcum[[i]]),  col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", ylab="", xlab="", main="", bty="n")
             }
             legend("topright", legend=paste(names(N50), ": N50 = ", N50, sep=""), cex=1.2, bty="n", pch=15, pt.cex=1.8, col=seq(along=Nl))
             close.screen(all=TRUE)
