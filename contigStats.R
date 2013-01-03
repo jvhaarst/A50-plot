@@ -63,7 +63,7 @@ contigStats <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentag
                     screen(1, new=FALSE)
                     plot(Nlcum[[i]]/reflength[[i]] * 100, Nl[[i]], col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", ylab="", xlab="", main="", bty="n")
             }
-            legend("topright", legend=paste(names(N50), ": N50 = ", N50, sep=""), cex=1.2, bty="n", pch=15, pt.cex=1.8, col=seq(along=Nl))
+            legend("bottomright", legend=paste(names(N50), ": N50 = ", N50, sep=""), cex=1.2, bty="n", pch=15, pt.cex=1.8, col=seq(along=Nl))
             close.screen(all=TRUE)
         }
         ## Plot cumulative contig length with ggplot2
@@ -121,7 +121,7 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
                     screen(1, new=FALSE)
                     plot(y=Nlcum[[i]]/reflength[[i]] * 100, x=seq_along(Nlcum[[i]]),  col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", ylab="", xlab="", main="", bty="n")
             }
-            legend("topright", legend=paste(names(N50), ": N50 = ", N50, sep=""), cex=1.2, bty="n", pch=15, pt.cex=1.8, col=seq(along=Nl))
+            legend("bottomright", legend=paste(names(N50), ": N50 = ", N50, sep=""), cex=1.2, bty="n", pch=15, pt.cex=1.8, col=seq(along=Nl))
             close.screen(all=TRUE)
         }
         ## Plot cumulative contig length with ggplot2
