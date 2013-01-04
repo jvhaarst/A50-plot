@@ -65,14 +65,23 @@ print(reflength)
 print(contigStatsFlipped(style="data",N=N, reflength=reflength))
 #contigStatsFlipped(style="base",N=N, reflength=reflength, pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size", main="Cumulative Plot of N Statistic")
 
-
+contigStatsFlipped(style="base",N=N, reflength=reflength, pch=20, xlim=c(0,30000),
+                   xlab="Number of contigs", 
+                   ylab="Cumulative contig length", 
+                   main="Cumulative Plot of N Statistic (own)"
+)
 # Use Heinz reference length for N50
 print("Use Heinz reference length for N50")
-reflength <- sapply(N, function(x) x <-as.numeric(reflength["heinz"]))
+reflength <- sapply(N, function(x) x <-as.numeric(reflength["heinz_reference"]))
 print(reflength)
 print(contigStatsFlipped(style="data",N=N, reflength=reflength))
 #contigStatsFlipped(style="base",N=N, reflength=reflength, pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size", main="Cumulative Plot of N Statistic")
 
+contigStatsFlipped(style="base",N=N, reflength=reflength, pch=20, xlim=c(0,30000),
+                   xlab="Number of contigs", 
+                   ylab="Cumulative contig length", 
+                   main="Cumulative Plot of N Statistic (heinz)"
+)
 
 # Use maximal reference length for N50
 print("Use maximal reference length for N50")
@@ -83,5 +92,5 @@ print(contigStatsFlipped(style="data",N=N, reflength=reflength))
 contigStatsFlipped(style="base",N=N, reflength=reflength, pch=20, xlim=c(0,30000),
                    xlab="Number of contigs", 
                    ylab="Cumulative contig length", 
-                   main="Cumulative Plot of N Statistic"
+                   main="Cumulative Plot of N Statistic (longest)"
 )
