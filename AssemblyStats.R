@@ -33,20 +33,25 @@ require("Biostrings")
 # max_ref <- max(reflength)
 # reflength <- sapply(N, function(x) x <- max_ref)
 
-heinz_allpaths         <- width(read.DNAStringSet("/home/assembly/dev_150/assemblies/allpaths_lg_sample_heinz_raw/sl/data/run/ASSEMBLIES/test/final.assembly.fasta"))
-#allpaths_454          <- width(read.DNAStringSet("/home/assembly/dev_150/assemblies/allpaths_lg_sample_heinz_raw_with454/sl/data/run/ASSEMBLIES/test/final.assembly.fasta"))
-#clc                   <- width(read.DNAStringSet("/home/assembly/dev_150/assemblies/clc-default/clc_contigs.fa"))
-arcanum_clc_default    <- width(read.DNAStringSet("/home/assembly/tomato150/denovo/arcanum/assembled/CLC-780MB-tryout1.fa"))
-arcanum_clc_nondefault <- width(read.DNAStringSet("/home/assembly/tomato150/denovo/arcanum/assembled/CLC-830MB-tryout2.fa"))
-heinz_reference        <- width(read.DNAStringSet("/home/assembly/dev_150/assemblies/S_lycopersicum_scaffolds.2.40.fa"))
-#fermi                 <- width(read.DNAStringSet("/home/assembly/progs/fermi/heinz/fmdef.p4.fa"))
-habrochaites_allpaths  <- width(read.DNAStringSet("/home/assembly/dev_150/assemblies/allpaths_lg_habrochaites_raw/sh/data/run/ASSEMBLIES/test/final.assembly.fasta"))
-pennellii_allpaths     <- width(read.                                                                                                                                                                                                                                                                                                                                                                                                DNAStringSet("/home/assembly/dev_150/assemblies/allpaths_lg_pennellii_raw/sp/data/run/ASSEMBLIES/test/final.assembly.fasta"))
+heinz_allpaths           <- width(readDNAStringSet("/home/assembly/dev_150/assemblies/allpaths_lg_sample_heinz_raw/sl/data/run/ASSEMBLIES/test/final.assembly.fasta"))
+#allpaths_454            <- width(readDNAStringSet("/home/assembly/dev_150/assemblies/allpaths_lg_sample_heinz_raw_with454/sl/data/run/ASSEMBLIES/test/final.assembly.fasta"))
+#clc                     <- width(readDNAStringSet("/home/assembly/dev_150/assemblies/clc-default/clc_contigs.fa"))
+arcanum_clc_default      <- width(readDNAStringSet("/home/assembly/dev_150/assemblies/clc_arcanum/CLC-780MB-tryout1.fa")) 
+arcanum_clc_nondefault   <- width(readDNAStringSet("/home/assembly/dev_150/assemblies/clc_arcanum/CLC-830MB-tryout2.fa"))
+heinz_reference          <- width(readDNAStringSet("/home/assembly/dev_150/assemblies/S_lycopersicum_scaffolds.2.40.fa"))
+#fermi                   <- width(readDNAStringSet("/home/assembly/progs/fermi/heinz/fmdef.p4.fa"))
+habrochaites_allpaths    <- width(readDNAStringSet("/home/assembly/dev_150/assemblies/allpaths_lg_habrochaites_raw/sh/data/run/ASSEMBLIES/test/final.assembly.fasta"))
+habrochaites_opera_scaf  <- width(readDNAStringSet("/home/aflit001/temptive/opera/habrochaites/output/scaffoldSeq.fasta"))
+pennellii_allpaths       <- width(readDNAStringSet("/home/assembly/dev_150/assemblies/allpaths_lg_pennellii_raw/sp/data/run/ASSEMBLIES/test/final.assembly.fasta"))
+pennellii_opera_scaf     <- width(readDNAStringSet("/home/aflit001/temptive/opera/pennellii/output/scaffoldSeq.fasta"))
+
 N <- list(
   heinz_reference=heinz_reference,
   heinz_allpaths=heinz_allpaths,
   habrochaites_allpaths=habrochaites_allpaths,
+  habrochaites_opera_scaf=habrochaites_opera_scaf,
   pennellii_allpaths=pennellii_allpaths,
+  pennellii_opera_scaf=pennellii_opera_scaf,
   arcanum_clc_default=arcanum_clc_default,
   arcanum_clc_nondefault=arcanum_clc_nondefault
   )
