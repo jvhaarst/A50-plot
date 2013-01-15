@@ -1,0 +1,12 @@
+#.gitignore
+.Rproj.user
+.Rhistory
+.RData
+.RDataTmp
+*.fasta
+*.out
+*.Rout
+*.tar.gz
+*.pdf
+*.png
+assemblystats.Rproj
