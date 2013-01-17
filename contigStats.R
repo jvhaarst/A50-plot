@@ -34,6 +34,12 @@
 ## efficient second method. In addition, it creates a distribution plot of the
 ## cumulative contig lengths, which is a very effective way for comparing assembly
 ## results.
+
+#saulo
+require("gdata")
+library("gdata")
+#oluas
+
 contigStats <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, xlim, ylim) {
         ## Compute cumulative length vectors for contig sets
         Nl <- lapply(names(N), function(x) rev(sort(N[[x]]))); names(Nl) <- names(N)
@@ -87,14 +93,31 @@ contigStats <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentag
                 theme(legend.title = element_text(size = 0))
         }
 }
-contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, xlim, ylim) {
+contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, trimSize=25000, xlim, ylim) {
         ## Compute cumulative length vectors for contig sets
-        Nl    <- lapply(names(N),  function(x) rev(sort(N[[x]]))); names(Nl)    <- names(N)
+		
+        Nl    <- lapply(names(N ), function(x) {
+				nN<-rev(sort(N[[x]]))
+
+				trimSizel<-trimSize
+				if ( length(nN) < trimSize ) {
+						print(paste("reducing trim size to", length(nN)))
+						trimSizel<-length(nN)-1
+				} else {
+						print(paste("keeping trim size. size ", length(nN)))
+				}
+				nN <- trimSum(nN, trimSizel, right=TRUE, na.rm=FALSE)
+
+				return(nN);
+		}); names(Nl)    <- names(N)
         Nlcum <- lapply(names(Nl), function(x) cumsum(Nl[[x]]));   names(Nlcum) <- names(Nl)
 
         ## Compute N50 values for use on graph
         N50 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x]/2 >= 0)[1]])
+        Ns  <- sapply(seq(along=N), function(x) length(N[[x]]))
         names(N50) <- names(N)
+        names(Ns ) <- names(N)
+		#print(paste("Ns", Ns))
 
         ## Return only data (no plot)
         if(style=="data") {
@@ -121,7 +144,7 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
                     screen(1, new=FALSE)
                     plot(y=Nlcum[[i]]/reflength[[i]] * 100, x=seq_along(Nlcum[[i]]),  col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", ylab="", xlab="", main="", bty="n")
             }
-            legend("bottomright", legend=paste(names(N50), ": N50 = ", N50, sep=""), cex=0.6, bty="n", pch=15, pt.cex=0.8, col=seq(along=Nl),
+            legend("bottomright", legend=paste(names(N50), ": N50 = ", N50, " Size = ", Ns, sep=""), cex=0.6, bty="n", pch=15, pt.cex=0.8, col=seq(along=Nl),
                    xjust=1
                    )
             close.screen(all=TRUE)
