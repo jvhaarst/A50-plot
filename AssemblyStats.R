@@ -4,6 +4,13 @@
 # Generate table of metrics of all assemblies
 # Generate graph to show assembly growth
 
+
+max_count <- 20000
+
+#CSV columns are:
+#Seq_Name Seq_File
+
+
 # Load the needed R library (from Bioconductor)
 #install.packages("gdata")
 #source("http://bioconductor.org/biocLite.R")
@@ -47,7 +54,6 @@ readSeq<-function(filename){
 
 input<-read.csv("input.csv", as.is=TRUE, header=TRUE, blank.lines.skip=TRUE, comment.char="#")
 attach(input)
-#print(input)
 inputCols<-ncol(input)
 inputRows<-nrow(input)
 inputValid<-0
@@ -73,7 +79,7 @@ print(paste("TOTAL VALID SEQUENCES: ", inputValid, sep=""))
 
 
 # Get the maximum contig count from the list
-max_count <- max(unlist(lapply(N,length)))
+#max_count <- max(unlist(lapply(N,length)))
 #max_count <- 30000
 source('./contigStats.R')
 
@@ -114,8 +120,6 @@ source('./contigStats.R')
 #                   ylab="Cumulative contig length",
 #                   main="Cumulative Plot of N Statistic (longest)"
 #)
-
-max_count <- 20000
 
 # Use maximal reference length for N50
 print("Use maximal reference length for N50")

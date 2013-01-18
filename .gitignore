@@ -9,6 +9,7 @@
 *.tar.gz
 *.pdf
 *.png
+*.csv
 .~*
 Rplots*
 assemblystats.Rproj
