@@ -45,51 +45,32 @@ readSeq<-function(filename){
   return(sortedSizes)
 }
 
-#heinz_allpaths                                       <- readSeq("/home/assembly/dev_150/assemblies/allpaths_lg_sample_heinz_raw/sl/data/run/ASSEMBLIES/test/final.assembly.fasta")
-#allpaths_454                                         <- readSeq("/home/assembly/dev_150/assemblies/allpaths_lg_sample_heinz_raw_with454/sl/data/run/ASSEMBLIES/test/final.assembly.fasta")
-heinz_reference                                      <- readSeq("/home/assembly/dev_150/assemblies/S_lycopersicum_scaffolds.2.40.fa")
+input<-read.csv("input.csv", as.is=TRUE, header=TRUE, blank.lines.skip=TRUE, comment.char="#")
+attach(input)
+#print(input)
+inputCols<-ncol(input)
+inputRows<-nrow(input)
+inputValid<-0
 
+N <- list()
 
-#habrochaites_aplg_ill_170_2k                         <- readSeq("/home/assembly/dev_150/assemblies/allpaths_lg_habrochaites_raw/sh/data/run/ASSEMBLIES/test/final.assembly.fasta")
-#habrochaites_aplg_ill_170_500_2k                     <- readSeq("/home/assembly/dev_150/assemblies/allpaths_lg_habrochaites_raw/sh/data/run/ASSEMBLIES/test2/final.assembly.fasta")
-#habrochaites_aplg_ill_170_2k_opera_454_8k_20k        <- readSeq("/home/aflit001/temptive/opera/habrochaites/output1/scaffoldSeqFmt.fasta")
-habrochaites_aplg_ill_170_500_2k_opera_454_8k_20k    <- readSeq("/home/aflit001/temptive/opera/habrochaites/output/scaffoldSeqFmt.fasta")
+for (rowNum in 0:inputRows) {
+  seqName<-Seq_Name[ rowNum ]
+  seqFile<-Seq_File[ rowNum ]
+    
+  if ( length(seqName) > 0 && nchar(seqName) > 0 ) {
+    print(paste("Row", rowNum))
+    print(paste("  seq name: '", seqName, "'", sep=""))
+    print(paste("  seq file: '", seqFile, "'", sep=""))
 
+    N[[ seqName ]] <- readSeq(seqFile)
 
-#pennellii_aplg_ill_170_2k                            <- readSeq("/home/assembly/dev_150/assemblies/allpaths_lg_pennellii_raw/sp/data/run/ASSEMBLIES/test/final.assembly.fasta")
-#pennellii_aplg_ill_170_500_2k                        <- readSeq("/home/assembly/dev_150/assemblies/allpaths_lg_pennellii_raw/sp/data/run/ASSEMBLIES/test2/final.assembly.fasta")
-#pennellii_aplg_ill_170_2k_opera_454_3k_8k_20k        <- readSeq("/home/aflit001/temptive/opera/pennellii/output1/scaffoldSeqFmt.fasta")
-pennellii_aplg_ill_170_500_2k_opera_454_3k_8k_20k    <- readSeq("/home/aflit001/temptive/opera/pennellii/output/scaffoldSeqFmt.fasta")
+    inputValid<-inputValid + 1
+  }
+}
 
+print(paste("TOTAL VALID SEQUENCES: ", inputValid, sep=""))
 
-#clc                                                  <- readSeq("/home/assembly/dev_150/assemblies/clc-default/clc_contigs.fa")
-#arcanum_clc_default                                  <- readSeq("/home/assembly/dev_150/assemblies/clc_arcanum/CLC-780MB-tryout1.fa")
-arcanum_clc_nondefault                               <- readSeq("/home/assembly/dev_150/assemblies/clc_arcanum/CLC-830MB-tryout2.fa")
-
-
-# Create named list of contig lengths. Could do that in one go, but this is a bit more flexible, and lets me change visual names to something more friendly
-N <- list(
-  "heinz reference (2.40)"                                = heinz_reference,
-  #"heinz_allpaths"                                        = heinz_allpaths,
-  
-  #"habrochaites_allpaths"                                 = habrochaites_allpaths,
-  #"habrochaites_opera_scaf"                               = habrochaites_opera_scaf,
-  #"pennellii_allpaths"                                    = pennellii_allpaths,
-  #"pennellii_opera_scaf"                                  = pennellii_opera_scaf,
-  
-  #"habrochaites (aplg ill 170+2k)"                        = habrochaites_aplg_ill_170_2k,
-  #"habrochaites (aplg ill 170+500+2k)"                    = habrochaites_aplg_ill_170_500_2k,
-  #"habrochaites (aplg ill 170+2k)+(opera 454 8k+20k)"     = habrochaites_aplg_ill_170_2k_opera_454_8k_20k,
-  "habrochaites (aplg ill 170+500+2k)+(opera 454 8k+20k)" = habrochaites_aplg_ill_170_500_2k_opera_454_8k_20k,
-
-  #"pennellii (aplg ill 170+2k)"                           = pennellii_aplg_ill_170_2k,
-  #"pennellii (aplg ill 170+500+2k)"                       = pennellii_aplg_ill_170_500_2k,
-  #"pennellii (aplg ill 170+2k)+(opera 454 3k+8k+20k)"     = pennellii_aplg_ill_170_2k_opera_454_3k_8k_20k,
-  "pennellii (aplg ill 170+500+2k)+(opera 454 3k+8k+20k)" = pennellii_aplg_ill_170_500_2k_opera_454_3k_8k_20k,
-
-  #arcanum_clc_default                                     = arcanum_clc_default,
-  "arcanum (clc ill 170+2k 454 8k+20k)"                   = arcanum_clc_nondefault
-  )
 
 # Get the maximum contig count from the list
 max_count <- max(unlist(lapply(N,length)))
@@ -143,7 +124,8 @@ max_ref <- as.numeric(max(reflength))
 print(reflength)
 stats<-contigStatsFlipped(style="data",N=N, reflength=reflength)
 print(stats)
-write.table(stats, file="Rplots.txt", sep="\t", append=FALSE)
+cat("\"Name\"\t"     , file="Rplots.txt",           append=FALSE)
+write.table(stats, file="Rplots.txt", sep="\t", append=TRUE )
 contigStatsFlipped(style="base",N=N, reflength=reflength, pch=20, xlim=c(0,max_count),
                     trimSize=max_count,
                     xlab="Number of contigs",

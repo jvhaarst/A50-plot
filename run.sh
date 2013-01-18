@@ -1,6 +1,5 @@
 #!/bin/bash
-rm Rplots.pdf  2>/dev/null
-rm Rplots*.png 2>/dev/null
+rm Rplots* 2>/dev/null
 
 R --no-save < AssemblyStats.R
 
