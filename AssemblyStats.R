@@ -13,6 +13,7 @@ max_count <- 20000
 
 # Load the needed R library (from Bioconductor)
 #install.packages("gdata")
+#install.packages("plyr")
 #source("http://bioconductor.org/biocLite.R")
 #biocLite("Biostrings")
 #biocLite("IRanges")
@@ -128,8 +129,8 @@ max_ref <- as.numeric(max(reflength))
 print(reflength)
 stats<-contigStatsFlipped(style="data",N=N, reflength=reflength)
 print(stats)
-cat("\"Name\"\t"     , file="Rplots.txt",           append=FALSE)
-write.table(stats, file="Rplots.txt", sep="\t", append=TRUE )
+cat("\"Name\"\t" , file="Rplots_stats.csv",           append=FALSE)
+write.table(stats, file="Rplots_stats.csv", sep="\t", append=TRUE )
 contigStatsFlipped(style="base",N=N, reflength=reflength, pch=20, xlim=c(0,max_count),
                     trimSize=max_count,
                     xlab="Number of contigs",

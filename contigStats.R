@@ -38,6 +38,7 @@
 #saulo
 require("gdata")
 library("gdata")
+source('./rbind.na.R')
 #oluas
 
 contigStats <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, xlim, ylim) {
@@ -112,6 +113,7 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
 		}); names(Nl)    <- names(N)
         Nlcum <- lapply(names(Nl), function(x) cumsum(Nl[[x]]));   names(Nlcum) <- names(Nl)
 
+
         ## Compute N50 values for use on graph
         N50 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x]/2 >= 0)[1]])
         Ns  <- sapply(seq(along=N), function(x) length(N[[x]]))
@@ -130,6 +132,15 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
                 		Mean=round(sapply(N, mean)), Median=round(sapply(N, median)),
                 		N_Contigs=sapply(N, length), Total_length=sapply(N, sum)
                 		)
+
+				alldata<-do.call(rbind.na, Nlcum)
+				#print(names(alldata)); quit()
+
+				cat("Contig Number\t" , file="Rplots_cumm.csv", append=FALSE)
+				cat(names(Ns)         , file="Rplots_cumm.csv", append=TRUE , sep="\t" )
+				cat("\n"              , file="Rplots_cumm.csv", append=TRUE )
+				write.table(t(alldata), file="Rplots_cumm.csv", sep="\t", na="\"\"", col.names=FALSE, append=TRUE )
+
                 return(Contig_Stats=list(stats))
         }
         ## Plot cumulative contig length with base graphics, only necessary when ggplot is unavailable
