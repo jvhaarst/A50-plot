@@ -3,5 +3,8 @@ TODO List
 
 - Make input csv with files to read an input variable
 - Make the reference length for N50 calculations an optional variable
-- Make y-axis of graph cumulative length instead of percentage
 - Put licence on project
+- Convert graph from 'dots' to 'lines' or even, maybe, smooth lines
+
+Mon Jan 21 01:27:52 CET 2013 - S
+- Make y-axis of graph cumulative length instead of percentage

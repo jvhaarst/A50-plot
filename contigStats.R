@@ -146,6 +146,27 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
         ## Plot cumulative contig length with base graphics, only necessary when ggplot is unavailable
 	if(style=="base") {
             if(missing(xlim)) xlim <- c(0, max(unlist(N)))
+            #if(missing(ylim)) ylim <- c(0, 100)
+            if(missing(ylim)) ylim <- c(0, max(unlist(Nlcum)))
+            split.screen(c(1,1))
+            for(i in seq(along=Nl)) {
+                    if(i==1) {
+                    	#plot(y=Nlcum[[i]]/reflength[[i]] * 100, x=seq_along(Nlcum[[i]]),col=i, pch=pch, xlim=xlim, ylim=ylim, xlab=xlab, ylab=ylab, main=main)
+                    	plot(y=Nlcum[[i]], x=seq_along(Nlcum[[i]]),col=i, pch=pch, xlim=xlim, ylim=ylim, xlab=xlab, ylab=ylab, main=main)
+                    }
+                    screen(1, new=FALSE)
+                    #plot(y=Nlcum[[i]]/reflength[[i]] * 100, x=seq_along(Nlcum[[i]]),  col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", ylab="", xlab="", main="", bty="n")
+                    plot(y=Nlcum[[i]], x=seq_along(Nlcum[[i]]),  col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", ylab="", xlab="", main="", bty="n")
+            }
+            legend("bottomright", legend=paste(names(N50), ": N50 = ", N50, " Size = ", Ns, sep=""), cex=0.6, bty="n", pch=15, pt.cex=0.8, col=seq(along=Nl),
+                   xjust=1
+                   )
+            close.screen(all=TRUE)
+        }
+        ## Plot cumulative contig length with ggplot2
+        ## Note: ggplot2 plotting options can be looked up with theme_get()
+	if(style=="baseperc") {
+            if(missing(xlim)) xlim <- c(0, max(unlist(N)))
             if(missing(ylim)) ylim <- c(0, 100)
             split.screen(c(1,1))
             for(i in seq(along=Nl)) {
