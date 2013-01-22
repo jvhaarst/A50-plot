@@ -1,4 +1,9 @@
+# Script to install dependancies.
 
+# Set CRAN mirror to download from
+options("repos" = c(CRAN = "http://cran.r-mirror.de/"))
+
+# Install packagess
 install.packages("gdata")
 install.packages("plyr")
 install.packages("sitools")
