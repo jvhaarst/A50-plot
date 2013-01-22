@@ -49,7 +49,7 @@ library("IRanges")
 # reflength <- sapply(N, function(x) x <- max_ref)
 
 readSeq<-function(filename){
-  sortedSizes <- sort(width(read.DNAStringSet(filename)), decreasing=TRUE)
+  sortedSizes <- sort(width(readDNAStringSet(filename)), decreasing=TRUE)
   return(sortedSizes)
 }
 
