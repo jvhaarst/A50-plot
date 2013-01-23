@@ -9,16 +9,10 @@
 max_count <- 20000
 
 
-
-# Load the needed R library (from Bioconductor)
+# Load the needed R libraries (from Bioconductor)
 require("Biostrings")
 require("IRanges")
-
-library("Biostrings")
-library("IRanges")
-
 source('./contigStats.R')
-
 
 
 # Function to read fasta files returning a size histogram
@@ -27,7 +21,6 @@ readSeq<-function(filename){
   sortedSizes <- sort(width(read.DNAStringSet(filename)), decreasing=TRUE) # Command line
   return(sortedSizes)
 }
-
 
 
 # Load CSV
@@ -60,12 +53,12 @@ for (rowNum in 0:inputRows) {
 print(paste("TOTAL VALID SEQUENCES: ", inputValid, sep=""))
 
 
-
 # Use maximal reference length for N50
 print("Use maximal reference length for N50")
 reflength <- sapply(N, sum)
 max_ref <- as.numeric(max(reflength))
 
+# Create plot and statistics
 # Get table and save it
 stats<-contigStatsFlipped(style="data",N=N, reflength=reflength)
 print(stats)
@@ -134,6 +127,8 @@ quit()
 #                   main="Cumulative Plot of N Statistic (Heinz as reference length)"
 #)
 
+# Get the maximum contig count from the list
+#max_count <- max(unlist(lapply(N,length)))
 
 
 
