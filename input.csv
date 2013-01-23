@@ -1,9 +1,9 @@
 Seq_Name,Seq_File
-#heinz allpaths,/home/assembly/dev_150/assemblies/allpaths_lg_sample_heinz_raw/sl/data/run/ASSEMBLIES/test/final.assembly.fasta
 #allpaths_454,/home/assembly/dev_150/assemblies/allpaths_lg_sample_heinz_raw_with454/sl/data/run/ASSEMBLIES/test/final.assembly.fasta
 #clc,/home/assembly/dev_150/assemblies/clc-default/clc_contigs.fa
 ,
 heinz reference (2.40),/home/assembly/dev_150/assemblies/S_lycopersicum_scaffolds.2.40.fa
+heinz (aplg ill 250+300+500+2k+3k+4k+5k),/home/assembly/dev_150/assemblies/allpaths_lg_sample_heinz_raw/sl/data/run/ASSEMBLIES/test/final.assembly.fasta
 ,
 #habrochaites (aplg ill 170+2k),/home/assembly/dev_150/assemblies/allpaths_lg_habrochaites_raw/sh/data/run/ASSEMBLIES/test/final.assembly.fasta
 #habrochaites (aplg ill 170+500+2k),/home/assembly/dev_150/assemblies/allpaths_lg_habrochaites_raw/sh/data/run/ASSEMBLIES/test2/final.assembly.fasta
@@ -18,3 +18,4 @@ pennellii (aplg ill 170+500+2k)+(scarpa 454 3k+8k+20k),/home/aflit001/temptive/o
 ,
 #arcanum (clc ill 170+2k 454 8k+20k) default,/home/assembly/dev_150/assemblies/clc_arcanum/CLC-780MB-tryout1.fa
 arcanum (clc ill 170+2k 454 8k+20k) non default,/home/assembly/dev_150/assemblies/clc_arcanum/CLC-830MB-tryout2.fa
+arcanum (aplg ill 170+2k),/home/assembly/dev_150/assemblies/allpaths_lg_sample_arcanum_raw/sa/data/run/ASSEMBLIES/test/final.assembly.fasta

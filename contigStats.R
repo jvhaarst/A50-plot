@@ -35,70 +35,69 @@
 ## cumulative contig lengths, which is a very effective way for comparing assembly
 ## results.
 
-#saulo
 require("gdata")
 library("gdata")
 library("sitools")
 source('./rbind.na.R')
-#oluas
 
-contigStats <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, xlim, ylim) {
-        ## Compute cumulative length vectors for contig sets
-        Nl <- lapply(names(N), function(x) rev(sort(N[[x]]))); names(Nl) <- names(N)
-        Nlcum <- lapply(names(Nl), function(x) cumsum(Nl[[x]])); names(Nlcum) <- names(Nl)
+#contigStats <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, xlim, ylim) {
+#        ## Compute cumulative length vectors for contig sets
+#        Nl <- lapply(names(N), function(x) rev(sort(N[[x]]))); names(Nl) <- names(N)
+#        Nlcum <- lapply(names(Nl), function(x) cumsum(Nl[[x]])); names(Nlcum) <- names(Nl)
+#
+#        ## Compute N50 values
+#        N50 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x]/2 >= 0)[1]])
+#        names(N50) <- names(N)
+#
+#        ## Return only data (no plot)
+#        if(style=="data") {
+#                N90 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.90 >= 0)[1]]); names(N50) <- names(N)
+#                N75 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.75 >= 0)[1]]); names(N50) <- names(N)
+#                N25 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.25 >= 0)[1]]); names(N50) <- names(N)
+#                stats <- cbind(N25, N50, N75, N90, Longest=sapply(N, max), Mean=sapply(N, mean), Median=sapply(N, median), Shortest=sapply(N, min), N_Contigs=sapply(N, length))
+#                return(c(Nlcum, Contig_Stats=list(stats)))
+#        }
+#        ## Plot cumulative contig length with base graphics, only necessary when ggplot is unavailable
+#	if(style=="base") {
+#            if(missing(xlim)) xlim <- c(0, 100)
+#            if(missing(ylim)) ylim <- c(0, max(unlist(N)))
+#            split.screen(c(1,1))
+#            for(i in seq(along=Nl)) {
+#                    if(i==1) {
+#                            plot(Nlcum[[i]]/reflength[[i]] * 100, Nl[[i]], col=i, pch=pch, xlim=xlim, ylim=ylim, xlab=xlab, ylab=ylab, main=main)
+#                    }
+#                    screen(1, new=FALSE)
+#                    plot(Nlcum[[i]]/reflength[[i]] * 100, Nl[[i]], col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", ylab="", xlab="", main="", bty="n")
+#            }
+#            legend("bottomright", legend=paste(names(N50), ": N50 = ", N50, sep=""), cex=1.2, bty="n", pch=15, pt.cex=1.8, col=seq(along=Nl))
+#            close.screen(all=TRUE)
+#        }
+#        ## Plot cumulative contig length with ggplot2
+#        ## Note: ggplot2 plotting options can be looked up with theme_get()
+#	if(style=="ggplot2") {
+#                require("ggplot2")
+#                plotdf <- data.frame(Samples=rep(names(Nlcum), sapply(Nlcum, length)), length=unlist(Nl), perc=unlist(lapply(names(Nlcum), function(x) Nlcum[[x]]/reflength[[x]]*100)))
+#                counts <- table(plotdf[,1]); counts <- counts[names(N50)]
+#                N50rep <- paste(plotdf[,1], ": N50=", unlist(lapply(as.character(unique(plotdf[,1])), function(x) rep(N50[x], counts[names(N50[x])]))), sep="")
+#                plotdf[,1] <- N50rep
+#                ggplot(plotdf, aes(perc, length, color=Samples)) +
+#                geom_point() +
+#                geom_line() +
+#                scale_x_continuous(xlab) +
+#                scale_y_continuous(ylab) +
+#                labs(title = main) +
+#                theme(plot.title = element_text(size = sizetitle)) +
+#                theme(axis.title.x = element_text(size = sizex)) +
+#                theme(axis.title.y = element_text(size = sizey, angle = 90)) +
+#                theme(legend.text = element_text(size = sizelegend)) +
+#                theme(legend.title = element_text(size = 0))
+#        }
+#}
 
-        ## Compute N50 values
-        N50 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x]/2 >= 0)[1]])
-        names(N50) <- names(N)
-
-        ## Return only data (no plot)
-        if(style=="data") {
-                N90 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.90 >= 0)[1]]); names(N50) <- names(N)
-                N75 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.75 >= 0)[1]]); names(N50) <- names(N)
-                N25 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.25 >= 0)[1]]); names(N50) <- names(N)
-                stats <- cbind(N25, N50, N75, N90, Longest=sapply(N, max), Mean=sapply(N, mean), Median=sapply(N, median), Shortest=sapply(N, min), N_Contigs=sapply(N, length))
-                return(c(Nlcum, Contig_Stats=list(stats)))
-        }
-        ## Plot cumulative contig length with base graphics, only necessary when ggplot is unavailable
-	if(style=="base") {
-            if(missing(xlim)) xlim <- c(0, 100)
-            if(missing(ylim)) ylim <- c(0, max(unlist(N)))
-            split.screen(c(1,1))
-            for(i in seq(along=Nl)) {
-                    if(i==1) {
-                            plot(Nlcum[[i]]/reflength[[i]] * 100, Nl[[i]], col=i, pch=pch, xlim=xlim, ylim=ylim, xlab=xlab, ylab=ylab, main=main)
-                    }
-                    screen(1, new=FALSE)
-                    plot(Nlcum[[i]]/reflength[[i]] * 100, Nl[[i]], col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", ylab="", xlab="", main="", bty="n")
-            }
-            legend("bottomright", legend=paste(names(N50), ": N50 = ", N50, sep=""), cex=1.2, bty="n", pch=15, pt.cex=1.8, col=seq(along=Nl))
-            close.screen(all=TRUE)
-        }
-        ## Plot cumulative contig length with ggplot2
-        ## Note: ggplot2 plotting options can be looked up with theme_get()
-	if(style=="ggplot2") {
-                require("ggplot2")
-                plotdf <- data.frame(Samples=rep(names(Nlcum), sapply(Nlcum, length)), length=unlist(Nl), perc=unlist(lapply(names(Nlcum), function(x) Nlcum[[x]]/reflength[[x]]*100)))
-                counts <- table(plotdf[,1]); counts <- counts[names(N50)]
-                N50rep <- paste(plotdf[,1], ": N50=", unlist(lapply(as.character(unique(plotdf[,1])), function(x) rep(N50[x], counts[names(N50[x])]))), sep="")
-                plotdf[,1] <- N50rep
-                ggplot(plotdf, aes(perc, length, color=Samples)) +
-                geom_point() +
-                geom_line() +
-                scale_x_continuous(xlab) +
-                scale_y_continuous(ylab) +
-                labs(title = main) +
-                theme(plot.title = element_text(size = sizetitle)) +
-                theme(axis.title.x = element_text(size = sizex)) +
-                theme(axis.title.y = element_text(size = sizey, angle = 90)) +
-                theme(legend.text = element_text(size = sizelegend)) +
-                theme(legend.title = element_text(size = 0))
-        }
-}
 contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, trimSize=25000, 		xunity=1e3, yunity=1e7, xlim, ylim) {
-        ## Compute cumulative length vectors for contig sets
-		
-        Nl    <- lapply(names(N ), function(x) {
+        ## Compute cumulative length vectors for contig sets, trimming at TRIMSIZE
+        print("Trimming histograms")
+		Nl    <- lapply(names(N ), function(x) {
 				nN<-rev(sort(N[[x]]))
 
 				trimSizel<-trimSize
@@ -116,16 +115,21 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
 
 
         ## Compute N50 values for use on graph
-        N50 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x]/2 >= 0)[1]])
-        Ns  <- sapply(seq(along=N), function(x) length(N[[x]]))
-        names(N50) <- names(N)
-        names(Ns ) <- names(N)
+        N50 <- sapply(seq(along=N), function(x) {Nl[[x]][which(Nlcum[[x]] - reflength[x]/2 >= 0)[1]]}); names(N50) <- names(N)
+        I50 <- sapply(seq(along=N), function(x) {        which(Nlcum[[x]] - reflength[x]/2 >= 0)[1] }); names(I50) <- names(N)
+        Ns  <- sapply(seq(along=N), function(x) length(N[[x]]))                                       ; names(Ns ) <- names(N)
+        
+		print("N50")
+		print(N50)
+		print("I50")
+		print(I50)
 		#print(paste("Ns", Ns))
 
 		maxx<-trimSize
 		maxx<-round(maxx/xunity)*xunity
         if(missing(xlim)) xlim <- c(0, max(unlist(N    )))
 		tickvaluesX<-seq(0, maxx, by=maxx/5)
+		print("Tick values"    )
 		print(     tickvaluesX )
 		print(f2si(tickvaluesX))
 
@@ -133,11 +137,17 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
 
         ## Return only data (no plot)
         if(style=="data") {
-                N90 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.90 >= 0)[1]]); names(N50) <- names(N)
-                N75 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.75 >= 0)[1]]); names(N50) <- names(N)
-                N25 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.25 >= 0)[1]]); names(N50) <- names(N)
+                N90 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.90 >= 0)[1]]); names(N90) <- names(N)
+                I90 <- sapply(seq(along=N), function(x)         which(Nlcum[[x]] - reflength[x] * 0.90 >= 0)[1] ); names(I90) <- names(N)
+
+                N75 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.75 >= 0)[1]]); names(N75) <- names(N)
+                I75 <- sapply(seq(along=N), function(x)         which(Nlcum[[x]] - reflength[x] * 0.75 >= 0)[1] ); names(I75) <- names(N)
+
+                N25 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.25 >= 0)[1]]); names(N25) <- names(N)
+                I25 <- sapply(seq(along=N), function(x)         which(Nlcum[[x]] - reflength[x] * 0.25 >= 0)[1] ); names(I25) <- names(N)
+                
                 stats <- cbind(
-                		N25, N50, N75, N90, 
+                		N25, I25, N50, I50, N75, I75, N90, I90,
                 		Longest=sapply(N, max), Shortest=sapply(N, min), 
                 		Mean=round(sapply(N, mean)), Median=round(sapply(N, median)),
                 		N_Contigs=sapply(N, length), Total_length=sapply(N, sum)
@@ -175,7 +185,7 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
             }
 		    axis(1, at=tickvaluesX, labels=f2si(tickvaluesX))
 		    axis(2, at=tickvaluesY, labels=f2si(tickvaluesY))
-            legend("bottomright", legend=paste(names(N50), ": N50 = ", N50, " Size = ", Ns, sep=""), cex=0.6, bty="n", pch=15, pt.cex=0.8, col=seq(along=Nl),
+            legend("bottomright", legend=paste(names(N50), ": N50=", N50, " I50=", I50," Size=", Ns, sep=""), cex=0.6, bty="n", pch=15, pt.cex=0.8, col=seq(along=Nl),
                    xjust=1
                    )
             close.screen(all=TRUE)

@@ -4,25 +4,87 @@
 # Generate table of metrics of all assemblies
 # Generate graph to show assembly growth
 
-
+# max contig count. Any assembly with more than this number of contigs will be trimmed
+# TODO: read from setup file
 max_count <- 20000
 
-#CSV columns are:
-#Seq_Name Seq_File
 
 
 # Load the needed R library (from Bioconductor)
-#install.packages("gdata")
-#install.packages("plyr")
-#source("http://bioconductor.org/biocLite.R")
-#biocLite("Biostrings")
-#biocLite("IRanges")
-
 require("Biostrings")
 require("IRanges")
 
 library("Biostrings")
 library("IRanges")
+
+source('./contigStats.R')
+
+
+
+# Function to read fasta files returning a size histogram
+readSeq<-function(filename){
+  #sortedSizes <- sort(width(readDNAStringSet(filename)), decreasing=TRUE) # Rstudio
+  sortedSizes <- sort(width(read.DNAStringSet(filename)), decreasing=TRUE) # Command line
+  return(sortedSizes)
+}
+
+
+
+# Load CSV
+input<-read.csv("input.csv", as.is=TRUE, header=TRUE, blank.lines.skip=TRUE, comment.char="#")
+attach(input)
+inputCols<-ncol(input)
+inputRows<-nrow(input)
+inputValid<-0
+
+
+
+# Load Fasta
+N <- list()
+
+for (rowNum in 0:inputRows) {
+  seqName<-Seq_Name[ rowNum ]
+  seqFile<-Seq_File[ rowNum ]
+    
+  if ( length(seqName) > 0 && nchar(seqName) > 0 ) {
+    print(paste("Row", rowNum))
+    print(paste("  seq name: '", seqName, "'", sep=""))
+    print(paste("  seq file: '", seqFile, "'", sep=""))
+
+    N[[ seqName ]] <- readSeq(seqFile)
+
+    inputValid<-inputValid + 1
+  }
+}
+
+print(paste("TOTAL VALID SEQUENCES: ", inputValid, sep=""))
+
+
+
+# Use maximal reference length for N50
+print("Use maximal reference length for N50")
+reflength <- sapply(N, sum)
+max_ref <- as.numeric(max(reflength))
+
+# Get table and save it
+stats<-contigStatsFlipped(style="data",N=N, reflength=reflength)
+print(stats)
+cat("\"Name\"\t" , file="Rplots_stats.csv",           append=FALSE)
+write.table(stats, file="Rplots_stats.csv", sep="\t", append=TRUE )
+
+# Generate graphic
+contigStatsFlipped(style="base",N=N, reflength=reflength, pch=20, xlim=c(0,max_count),
+                    trimSize=max_count,
+                    xlab="Number of contigs",
+                    ylab="Cumulative contig length",
+                    main="Cumulative Plot of A50 Statistic"
+)
+
+quit()
+
+
+########### TRASH BIN ###########################
+
 
 
 # Create list to hold assembly info
@@ -48,41 +110,6 @@ library("IRanges")
 # max_ref <- max(reflength)
 # reflength <- sapply(N, function(x) x <- max_ref)
 
-readSeq<-function(filename){
-  sortedSizes <- sort(width(readDNAStringSet(filename)), decreasing=TRUE)
-  return(sortedSizes)
-}
-
-input<-read.csv("input.csv", as.is=TRUE, header=TRUE, blank.lines.skip=TRUE, comment.char="#")
-attach(input)
-inputCols<-ncol(input)
-inputRows<-nrow(input)
-inputValid<-0
-
-N <- list()
-
-for (rowNum in 0:inputRows) {
-  seqName<-Seq_Name[ rowNum ]
-  seqFile<-Seq_File[ rowNum ]
-    
-  if ( length(seqName) > 0 && nchar(seqName) > 0 ) {
-    print(paste("Row", rowNum))
-    print(paste("  seq name: '", seqName, "'", sep=""))
-    print(paste("  seq file: '", seqFile, "'", sep=""))
-
-    N[[ seqName ]] <- readSeq(seqFile)
-
-    inputValid<-inputValid + 1
-  }
-}
-
-print(paste("TOTAL VALID SEQUENCES: ", inputValid, sep=""))
-
-
-# Get the maximum contig count from the list
-#max_count <- max(unlist(lapply(N,length)))
-#max_count <- 30000
-source('./contigStats.R')
 
 ## Use own reference length for N50
 #print("Use own reference length for N50")
@@ -121,19 +148,3 @@ source('./contigStats.R')
 #                   ylab="Cumulative contig length",
 #                   main="Cumulative Plot of N Statistic (longest)"
 #)
-
-# Use maximal reference length for N50
-print("Use maximal reference length for N50")
-reflength <- sapply(N, sum)
-max_ref <- as.numeric(max(reflength))
-print(reflength)
-stats<-contigStatsFlipped(style="data",N=N, reflength=reflength)
-print(stats)
-cat("\"Name\"\t" , file="Rplots_stats.csv",           append=FALSE)
-write.table(stats, file="Rplots_stats.csv", sep="\t", append=TRUE )
-contigStatsFlipped(style="base",N=N, reflength=reflength, pch=20, xlim=c(0,max_count),
-                    trimSize=max_count,
-                    xlab="Number of contigs",
-                    ylab="Cumulative contig length",
-                    main="Cumulative Plot of N Statistic (longest)"
-)
