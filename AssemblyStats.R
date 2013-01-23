@@ -6,12 +6,9 @@
 
 max_count <- 20000
 
-# Load the needed R library (from Bioconductor)
+# Load the needed R libraries (from Bioconductor)
 require("Biostrings")
 require("IRanges")
-library("Biostrings")
-library("IRanges")
-
 
 # Create list to hold assembly info from csv file
 readSeq<-function(filename){
