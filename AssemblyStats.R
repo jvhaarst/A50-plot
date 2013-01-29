@@ -24,7 +24,16 @@ readSeq<-function(filename){
 
 
 # Load CSV
-input<-read.csv("input.csv", as.is=TRUE, header=TRUE, blank.lines.skip=TRUE, comment.char="#")
+inputFile<-commandArgs(TRUE)
+
+if (!file.exists(inputFile[1])){
+  print("no input or input does not exists")
+  print(inputFile[1])
+  quit()
+}
+
+print(paste("reading ", inputFile[1]))
+input<-read.csv(inputFile[1], as.is=TRUE, header=TRUE, blank.lines.skip=TRUE, comment.char="#")
 attach(input)
 inputCols<-ncol(input)
 inputRows<-nrow(input)
@@ -40,7 +49,7 @@ for (rowNum in 0:inputRows) {
   seqFile<-Seq_File[ rowNum ]
     
   if ( length(seqName) > 0 && nchar(seqName) > 0 ) {
-    print(paste("Row", rowNum))
+    #print(paste("Row", rowNum))
     print(paste("  seq name: '", seqName, "'", sep=""))
     print(paste("  seq file: '", seqFile, "'", sep=""))
 

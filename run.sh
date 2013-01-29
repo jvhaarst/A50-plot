@@ -1,7 +1,7 @@
 #!/bin/bash
 rm Rplots* 2>/dev/null
 
-R --no-save < AssemblyStats.R
+Rscript AssemblyStats.R input.csv
 
 if [[ -f "Rplots.pdf" ]]; then
     echo "converting pdf to png"

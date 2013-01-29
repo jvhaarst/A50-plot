@@ -125,6 +125,7 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
 		print(I50)
 		#print(paste("Ns", Ns))
 
+        #add tick values every 5th part of the X length
 		maxx<-trimSize
 		maxx<-round(maxx/xunity)*xunity
         if(missing(xlim)) xlim <- c(0, max(unlist(N    )))
@@ -133,8 +134,26 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
 		print(     tickvaluesX )
 		print(f2si(tickvaluesX))
 
+        
+        #calculate the bigger-minimum (bigger contig) and the smaller-maximum (minimum assembled size)
+        #with that, find the "real" comparative N50 between all assemblies
+        qmax<-unlist(lapply(seq(along=Nlcum), function(x) Nlcum[[x]][which.max(abs(Nlcum[[x]]))]))
+        #print(paste("qmax ", qmax))
+        
+        qmaxmin<-min(qmax)
+        print(paste("qmaxmin ", qmaxmin))
+        
+        qmin<-unlist(lapply(seq(along=Nlcum), function(x) Nlcum[[x]][which.min(abs(Nlcum[[x]]))]))
+        #print(paste("qmin ", qmin))
+        
+        qminmax<-min(qmin)
+        print(paste("qminmax ", qminmax))
+        
+        Q50<-(qmaxmin+qminmax) / 2
+        Q25<-Q50 / 2
+        Q75<-Q50 + Q25
 
-
+        
         ## Return only data (no plot)
         if(style=="data") {
                 N90 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.90 >= 0)[1]]); names(N90) <- names(N)
@@ -165,7 +184,8 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
         }
         ## Plot cumulative contig length with base graphics, only necessary when ggplot is unavailable
 	if(style=="base") {
-		    maxy<-max(unlist(Nlcum))
+		    #add tick values every 5th part of the X length
+            maxy<-max(unlist(Nlcum))
 			maxy<-round(maxy/yunity)*yunity
 
             if(missing(ylim)) ylim <- c(0, max(unlist(Nlcum)))
@@ -174,7 +194,7 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
 			
 		    print(     tickvaluesY )
 		    print(f2si(tickvaluesY))
-			
+            
             split.screen(c(1,1))
             for(i in seq(along=Nl)) {
                     if(i==1) {
@@ -188,6 +208,13 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
             legend("bottomright", legend=paste(names(N50), ": N50=", N50, " I50=", I50," Size=", Ns, sep=""), cex=0.6, bty="n", pch=15, pt.cex=0.8, col=seq(along=Nl),
                    xjust=1
                    )
+			
+            abline(h=qminmax)
+            abline(h=Q25    )
+            abline(h=Q50    )
+            abline(h=Q75    )
+            abline(h=qmaxmin)
+
             close.screen(all=TRUE)
         }
         ## Plot cumulative contig length with ggplot2
