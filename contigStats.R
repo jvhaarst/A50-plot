@@ -93,7 +93,7 @@ source('./rbind.na.R')
 #        }
 #}
 
-contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, trimSize=25000, 		xunity=1e3, yunity=1e7, xlim, ylim) {
+contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, trimSize=25000, xunity=1e3, doQs=False, yunity=1e7, xlim, ylim) {
         ## Compute cumulative length vectors for contig sets, trimming at TRIMSIZE
         cat("Trimming histograms\n")
 		Nl    <- lapply(names(N ), function(x) {
@@ -209,11 +209,13 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
                    xjust=1
                    )
 			
-            abline(h=qminmax)
-            abline(h=Q25    )
-            abline(h=Q50    )
-            abline(h=Q75    )
-            abline(h=qmaxmin)
+            if ( doQs ) {
+                abline(h=qminmax)
+                abline(h=Q25    )
+                abline(h=Q50    )
+                abline(h=Q75    )
+                abline(h=qmaxmin)
+            }
 
             close.screen(all=TRUE)
         }
