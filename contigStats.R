@@ -35,9 +35,8 @@
 ## cumulative contig lengths, which is a very effective way for comparing assembly
 ## results.
 
-require("gdata")
-library("gdata")
-library("sitools")
+require("gdata"  , warn.conflicts=FALSE)
+require("sitools", warn.conflicts=FALSE)
 source('./rbind.na.R')
 
 #contigStats <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, xlim, ylim) {
@@ -96,16 +95,16 @@ source('./rbind.na.R')
 
 contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, trimSize=25000, 		xunity=1e3, yunity=1e7, xlim, ylim) {
         ## Compute cumulative length vectors for contig sets, trimming at TRIMSIZE
-        print("Trimming histograms")
+        cat("Trimming histograms\n")
 		Nl    <- lapply(names(N ), function(x) {
 				nN<-rev(sort(N[[x]]))
 
 				trimSizel<-trimSize
 				if ( length(nN) < trimSize ) {
-						print(paste("reducing trim size to", length(nN)))
+						cat(paste("reducing trim size to", length(nN), "\n"))
 						trimSizel<-length(nN)-1
 				} else {
-						print(paste("keeping trim size. size ", length(nN)))
+						cat(paste("keeping trim size. size ", length(nN), "\n"))
 				}
 				nN <- trimSum(nN, trimSizel, right=TRUE, na.rm=FALSE)
 
@@ -119,10 +118,10 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
         I50 <- sapply(seq(along=N), function(x) {        which(Nlcum[[x]] - reflength[x]/2 >= 0)[1] }); names(I50) <- names(N)
         Ns  <- sapply(seq(along=N), function(x) length(N[[x]]))                                       ; names(Ns ) <- names(N)
         
-		print("N50")
-		print(N50)
-		print("I50")
-		print(I50)
+		cat("N50\n")
+		cat(paste(N50, "\n"))
+		cat("I50\n")
+		cat(paste(I50, "\n"))
 		#print(paste("Ns", Ns))
 
         #add tick values every 5th part of the X length
@@ -130,24 +129,24 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
 		maxx<-round(maxx/xunity)*xunity
         if(missing(xlim)) xlim <- c(0, max(unlist(N    )))
 		tickvaluesX<-seq(0, maxx, by=maxx/5)
-		print("Tick values"    )
-		print(     tickvaluesX )
-		print(f2si(tickvaluesX))
+		cat("Tick values X\n"    )
+		cat(paste(     tickvaluesX , "\n"))
+		cat(paste(f2si(tickvaluesX), "\n"))
 
         
         #calculate the bigger-minimum (bigger contig) and the smaller-maximum (minimum assembled size)
         #with that, find the "real" comparative N50 between all assemblies
         qmax<-unlist(lapply(seq(along=Nlcum), function(x) Nlcum[[x]][which.max(abs(Nlcum[[x]]))]))
-        #print(paste("qmax ", qmax))
+        #cat(paste("qmax ", qmax, "\n"))
         
         qmaxmin<-min(qmax)
-        print(paste("qmaxmin ", qmaxmin))
+        cat(paste("qmaxmin ", qmaxmin, "\n"))
         
         qmin<-unlist(lapply(seq(along=Nlcum), function(x) Nlcum[[x]][which.min(abs(Nlcum[[x]]))]))
-        #print(paste("qmin ", qmin))
+        #cat(paste("qmin ", qmin, "\n"))
         
         qminmax<-min(qmin)
-        print(paste("qminmax ", qminmax))
+        cat(paste("qminmax ", qminmax, "\n"))
         
         Q50<-(qmaxmin+qminmax) / 2
         Q25<-Q50 / 2
@@ -192,8 +191,9 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
 			
 			tickvaluesY<-seq(0, maxy, by=maxy/5)
 			
-		    print(     tickvaluesY )
-		    print(f2si(tickvaluesY))
+            cat("Tick values Y\n"    )
+            cat(paste(     tickvaluesY , "\n"))
+            cat(paste(f2si(tickvaluesY), "\n"))
             
             split.screen(c(1,1))
             for(i in seq(along=Nl)) {

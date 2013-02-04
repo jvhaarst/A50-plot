@@ -5,13 +5,16 @@
 # Generate graph to show assembly growth
 
 # max contig count. Any assembly with more than this number of contigs will be trimmed
-# TODO: read from setup file
 max_count <- 20000
+
+# warn off
+options(warn=-1)
 
 
 # Load the needed R libraries (from Bioconductor)
-require("Biostrings")
-require("IRanges")
+require("Biostrings", warn.conflicts=FALSE)
+require("IRanges"   , warn.conflicts=FALSE)
+
 source('./contigStats.R')
 
 
@@ -27,12 +30,12 @@ readSeq<-function(filename){
 inputFile<-commandArgs(TRUE)
 
 if (!file.exists(inputFile[1])){
-  print("no input or input does not exists")
-  print(inputFile[1])
+  cat("no input or input does not exists\n")
+  cat(inputFile[1], "\n")
   quit()
 }
 
-print(paste("reading ", inputFile[1]))
+cat(paste("reading ", inputFile[1], "\n"))
 input<-read.csv(inputFile[1], as.is=TRUE, header=TRUE, blank.lines.skip=TRUE, comment.char="#")
 attach(input)
 inputCols<-ncol(input)
@@ -50,8 +53,13 @@ for (rowNum in 0:inputRows) {
     
   if ( length(seqName) > 0 && nchar(seqName) > 0 ) {
     #print(paste("Row", rowNum))
-    print(paste("  seq name: '", seqName, "'", sep=""))
-    print(paste("  seq file: '", seqFile, "'", sep=""))
+    cat(paste("  seq name: '", seqName, "'\n", sep=""))
+    cat(paste("  seq file: '", seqFile, "'\n", sep=""))
+
+    if (!file.exists(seqFile)){
+      cat(paste("Sequence file ", seqFile, " does not exists. check your input file\n"));
+      quit()
+    }
 
     N[[ seqName ]] <- readSeq(seqFile)
 
@@ -59,20 +67,21 @@ for (rowNum in 0:inputRows) {
   }
 }
 
-print(paste("TOTAL VALID SEQUENCES: ", inputValid, sep=""))
+cat(paste("TOTAL VALID SEQUENCES: ", inputValid, "\n", sep=""))
 
 
 # Use maximal reference length for N50
-print("Use maximal reference length for N50")
+cat("Using maximal reference length for N50\n")
 reflength <- sapply(N, sum)
 max_ref <- as.numeric(max(reflength))
 
 # Create plot and statistics
 # Get table and save it
 stats<-contigStatsFlipped(style="data",N=N, reflength=reflength)
+cat("stats\n")
 print(stats)
-cat("\"Name\"\t" , file="Rplots_stats.csv",           append=FALSE)
-write.table(stats, file="Rplots_stats.csv", sep="\t", append=TRUE )
+cat("\"Name\"\t", file="Rplots_stats.csv",             append=FALSE)
+write.table(stats , file="Rplots_stats.csv", sep="\t", append=TRUE )
 
 # Generate graphic
 contigStatsFlipped(style="base",N=N, reflength=reflength, pch=20, xlim=c(0,max_count),
