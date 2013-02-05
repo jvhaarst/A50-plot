@@ -74,6 +74,8 @@ cat(paste("TOTAL VALID SEQUENCES: ", inputValid, "\n", sep=""))
 cat("Using maximal reference length for N50\n")
 reflength <- sapply(N, sum)
 max_ref <- as.numeric(max(reflength))
+cat(paste("Reference Length ",reflength,"\n"))
+cat(paste("Max Reference Length ",max_ref,"\n"))
 
 # Create plot and statistics
 # Get table and save it
