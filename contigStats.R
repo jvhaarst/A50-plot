@@ -96,7 +96,8 @@ source('./rbind.na.R')
 contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, trimSize=25000, xunity=1e3, doQs=FALSE, yunity=1e7, xlim, ylim) {
         ## Compute cumulative length vectors for contig sets, trimming at TRIMSIZE
         cat("Trimming histograms\n")
-		Nl    <- lapply(names(N ), function(x) {
+
+		NlTrim<- lapply(names(N ), function(x) {
 				nN<-rev(sort(N[[x]]))
 
 				trimSizel<-trimSize
@@ -109,9 +110,12 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
 				nN <- trimSum(nN, trimSizel, right=TRUE, na.rm=FALSE)
 
 				return(nN);
-		}); names(Nl)    <- names(N)
-        Nlcum <- lapply(names(Nl), function(x) cumsum(Nl[[x]]));   names(Nlcum) <- names(Nl)
+		}); names(NlTrim)    <- names(N)
 
+
+		Nl        <- lapply(names(N), function(x) rev(sort(N[[x]]))  ); names(Nl       ) <- names(N)
+        Nlcum     <- lapply(names(N), function(x) cumsum(Nl[[x]])    ); names(Nlcum    ) <- names(N)
+        NlTrimCum <- lapply(names(N), function(x) cumsum(NlTrim[[x]])); names(NlTrimCum) <- names(N)
 
         ## Compute N50 values for use on graph
         N50 <- sapply(seq(along=N), function(x) {Nl[[x]][which(Nlcum[[x]] - reflength[x]/2 >= 0)[1]]}); names(N50) <- names(N)
@@ -171,7 +175,7 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
                 		N_Contigs=sapply(N, length), Total_length=sapply(N, sum)
                 		)
 
-				alldata<-do.call(rbind.na, Nlcum)
+				alldata<-do.call(rbind.na, NlTrimCum)
 				#print(names(alldata)); quit()
 
 				cat("Contig Number\t" , file="Rplots_cumm.csv", append=FALSE)
@@ -184,10 +188,10 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
         ## Plot cumulative contig length with base graphics, only necessary when ggplot is unavailable
 	if(style=="base") {
 		    #add tick values every 5th part of the X length
-            maxy<-max(unlist(Nlcum))
+            maxy<-max(unlist(NlTrimCum))
 			maxy<-round(maxy/yunity)*yunity
 
-            if(missing(ylim)) ylim <- c(0, max(unlist(Nlcum)))
+            if(missing(ylim)) ylim <- c(0, max(unlist(NlTrimCum)))
 			
 			tickvaluesY<-seq(0, maxy, by=maxy/5)
 			
@@ -196,12 +200,12 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
             cat(paste(f2si(tickvaluesY), "\n"))
             
             split.screen(c(1,1))
-            for(i in seq(along=Nl)) {
+            for(i in seq(along=NlTrim)) {
                     if(i==1) {
-                    	plot(y=Nlcum[[i]], x=seq_along(Nlcum[[i]]),col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", xlab=xlab, ylab=ylab, main=main, type='o')
+                    	plot(y=NlTrimCum[[i]], x=seq_along(NlTrimCum[[i]]),col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", xlab=xlab, ylab=ylab, main=main, type='o')
                     }
                     screen(1, new=FALSE)
-                    plot(y=Nlcum[[i]], x=seq_along(Nlcum[[i]]),  col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", ylab="", xlab="", main="", bty="n", ann=FALSE, type='o')
+                    plot(y=NlTrimCum[[i]], x=seq_along(NlTrimCum[[i]]),  col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", ylab="", xlab="", main="", bty="n", ann=FALSE, type='o')
             }
 		    axis(1, at=tickvaluesX, labels=f2si(tickvaluesX))
 		    axis(2, at=tickvaluesY, labels=f2si(tickvaluesY))
@@ -227,12 +231,12 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
 			if(missing(ylim)) ylim <- c(0, 100)
             
 			split.screen(c(1,1))
-            for(i in seq(along=Nl)) {
+            for(i in seq(along=NlTrim)) {
                     if(i==1) {
-                    	plot(y=Nlcum[[i]]/reflength[[i]] * 100, x=seq_along(Nlcum[[i]]),col=i, pch=pch, xlim=xlim, xaxt="n", yaxt="n", ylim=ylim, xlab=xlab, ylab=ylab, main=main, type='o')
+                    	plot(y=NlTrimCum[[i]]/reflength[[i]] * 100, x=seq_along(NlTrimCum[[i]]),col=i, pch=pch, xlim=xlim, xaxt="n", yaxt="n", ylim=ylim, xlab=xlab, ylab=ylab, main=main, type='o')
                     }
                     screen(1, new=FALSE)
-                    plot(y=Nlcum[[i]]/reflength[[i]] * 100, x=seq_along(Nlcum[[i]]),  col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", ylab="", xlab="", main="", bty="n", ann=FALSE, type='o')
+                    plot(y=NlTrimCum[[i]]/reflength[[i]] * 100, x=seq_along(NlTrimCum[[i]]),  col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", ylab="", xlab="", main="", bty="n", ann=FALSE, type='o')
 					axis(1, at=tickvalues, labels=f2si(tickvalues))
 					axis(2, at=tickvalues, labels=f2si(tickvalues))
             }
