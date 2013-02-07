@@ -1,9 +1,6 @@
 #!/bin/bash
-rm Rplots* 2>/dev/null
+INFILE=input.csv
+rm $INFILE.* 2>/dev/null
 
-Rscript AssemblyStats.R input.csv
+Rscript AssemblyStats.R $INFILE
 
-if [[ -f "Rplots.pdf" ]]; then
-    echo "converting pdf to png"
-    bash pdf2png.sh
-fi

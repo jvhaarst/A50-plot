@@ -99,7 +99,7 @@ fmtnum<-function(num){
     return(formatC(num, format="d", big.mark=","))
 }
 
-contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, trimSize=25000, xunity=1e3, doQs=FALSE, yunity=1e7, xlim, ylim) {
+contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, trimSize=25000, xunity=1e3, doLookup=FALSE, yunity=1e7, xlim, ylim, outBaseName="Rplots") {
         ## Compute cumulative length vectors for contig sets, trimming at TRIMSIZE
         cat("Trimming histograms\n")
 
@@ -108,11 +108,12 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
 
 				trimSizel<-trimSize
 				if ( length(nN) < trimSize ) {
-						cat(paste("reducing trim size to", length(nN), "\n"))
+						cat(paste("reducing trim size to"  , length(nN), "\n"))
 						trimSizel<-length(nN)-1
 				} else {
-						cat(paste("keeping trim size. size ", length(nN), "\n"))
+						cat(paste("keeping trim size. size", length(nN), "\n"))
 				}
+                    
 				nN <- trimSum(nN, trimSizel, right=TRUE, na.rm=FALSE)
 
 				return(nN);
@@ -120,7 +121,7 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
 
         numEls<-length(names(N))
 
-        cat(paste("number of elements: ", numEls, "\n"))
+        cat(paste("number of elements:", numEls, "\n"))
         
 		Nl        <- lapply(names(N), function(x) rev(sort(N[[x]]))  ); names(Nl       ) <- names(N)
         Nlcum     <- lapply(names(N), function(x) cumsum(Nl[[x]])    ); names(Nlcum    ) <- names(N)
@@ -146,59 +147,81 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
 		cat(paste(     tickvaluesX , "\n"))
 		cat(paste(f2si(tickvaluesX), "\n"))
 
-        qmax<-unlist(lapply(seq(along=Nlcum), function(x) Nlcum[[x]][which.max(abs(Nlcum[[x]]))]))
+        lookup_max<-unlist(lapply(seq(along=Nlcum), function(x) Nlcum[[x]][which.max(abs(Nlcum[[x]]))]))
         #cat(paste("qmax ", qmax, "\n"))
         
-        qmaxmax<-max(qmax)
-        qmaxmin<-min(qmax)
-        cat(paste("qmaxmax ", qmaxmax, "\n"))
-        cat(paste("qmaxmin ", qmaxmin, "\n"))
+        lookup_mean<-floor(1/mean(1/lookup_max))
+        cat(paste("Nlookup:  ", lookup_mean  , "\n"))
+        lookup_mean75<-floor(lookup_mean * .75)
+        cat(paste("Nlookup75:", lookup_mean75, "\n"))
         
-        qmaxmax50<-ceiling( qmaxmax/2 )
-        qmaxmin50<-ceiling( qmaxmin/2 )
-        cat(paste("qmaxmax50 ", qmaxmax50, "\n"))
-        cat(paste("qmaxmin50 ", qmaxmin50, "\n"))
-        
-        
-        Nqmaxmax50 <- sapply(seq(along=N), function(x) {Nl[[x]][which(Nlcum[[x]] - qmaxmax50 >= 0)[1]]}); names(Nqmaxmax50) <- names(N)
-        Iqmaxmax50 <- sapply(seq(along=N), function(x) {        which(Nlcum[[x]] - qmaxmax50 >= 0)[1] }); names(Iqmaxmax50) <- names(N)
-        
-        Nqmaxmin50 <- sapply(seq(along=N), function(x) {Nl[[x]][which(Nlcum[[x]] - qmaxmin50 >= 0)[1]]}); names(Nqmaxmin50) <- names(N)
-        Iqmaxmin50 <- sapply(seq(along=N), function(x) {        which(Nlcum[[x]] - qmaxmin50 >= 0)[1] }); names(Iqmaxmin50) <- names(N)
-        
-        cat(paste(names(N), "Nqmaxmax50 ", Nqmaxmax50, " Iqmaxmax50 ", Iqmaxmax50, "\n"))
-        cat(paste(names(N), "Nqmaxmin50 ", Nqmaxmin50, " Iqmaxmin50 ", Iqmaxmin50, "\n"))
+        Nlookup_mean75     <- sapply(seq(along=N), function(x) {Nl[[x]][which(Nlcum[[x]] - lookup_mean75 >= 0)[1]]}); names(Nlookup_mean75) <- names(N)
+        Ilookup_mean75     <- sapply(seq(along=N), function(x) {        which(Nlcum[[x]] - lookup_mean75 >= 0)[1] }); names(Ilookup_mean75) <- names(N)
+        Ilookup_mean75Trim <- sapply(seq(along=N), function(x) {if ( Ilookup_mean75[x] > trimSize ) { return(trimSize); } else { return(Ilookup_mean75[x]); }} ); ; names(Ilookup_mean75Trim) <- names(N)
+        cat(paste(names(N), "Nlookup_mean75", Nlookup_mean75, "Ilookup_mean75", Ilookup_mean75, "\n"))
+        print(Ilookup_mean75Trim)
+        #qmaxmax<-max(qmax)
+        #qmaxmin<-min(qmax)
+        #cat(paste("qmaxmax ", qmaxmax, "\n"))
+        #cat(paste("qmaxmin ", qmaxmin, "\n"))
+        #
+        #qmaxmax50<-ceiling( qmaxmax/2 )
+        #qmaxmin50<-ceiling( qmaxmin/2 )
+        #cat(paste("qmaxmax50 ", qmaxmax50, "\n"))
+        #cat(paste("qmaxmin50 ", qmaxmin50, "\n"))
+        #
+        #
+        #Nqmaxmax50 <- sapply(seq(along=N), function(x) {Nl[[x]][which(Nlcum[[x]] - qmaxmax50 >= 0)[1]]}); names(Nqmaxmax50) <- names(N)
+        #Iqmaxmax50 <- sapply(seq(along=N), function(x) {        which(Nlcum[[x]] - qmaxmax50 >= 0)[1] }); names(Iqmaxmax50) <- names(N)
+        #
+        #Nqmaxmin50 <- sapply(seq(along=N), function(x) {Nl[[x]][which(Nlcum[[x]] - qmaxmin50 >= 0)[1]]}); names(Nqmaxmin50) <- names(N)
+        #Iqmaxmin50 <- sapply(seq(along=N), function(x) {        which(Nlcum[[x]] - qmaxmin50 >= 0)[1] }); names(Iqmaxmin50) <- names(N)
+        #
+        #cat(paste(names(N), "Nqmaxmax50 ", Nqmaxmax50, " Iqmaxmax50 ", Iqmaxmax50, "\n"))
+        #cat(paste(names(N), "Nqmaxmin50 ", Nqmaxmin50, " Iqmaxmin50 ", Iqmaxmin50, "\n"))
         
         ## Return only data (no plot)
         if(style=="data") {
-                N90 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.90 >= 0)[1]]); names(N90) <- names(N)
-                I90 <- sapply(seq(along=N), function(x)         which(Nlcum[[x]] - reflength[x] * 0.90 >= 0)[1] ); names(I90) <- names(N)
+            outTsvCumm = paste(outBaseName, ".cumm.tsv", sep="")
+            outTsvStat = paste(outBaseName, ".stat.tsv", sep="")
 
-                N75 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.75 >= 0)[1]]); names(N75) <- names(N)
-                I75 <- sapply(seq(along=N), function(x)         which(Nlcum[[x]] - reflength[x] * 0.75 >= 0)[1] ); names(I75) <- names(N)
+            
+            N90 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.90 >= 0)[1]]); names(N90) <- names(N)
+            I90 <- sapply(seq(along=N), function(x)         which(Nlcum[[x]] - reflength[x] * 0.90 >= 0)[1] ); names(I90) <- names(N)
 
-                N25 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.25 >= 0)[1]]); names(N25) <- names(N)
-                I25 <- sapply(seq(along=N), function(x)         which(Nlcum[[x]] - reflength[x] * 0.25 >= 0)[1] ); names(I25) <- names(N)
-                
-                stats <- cbind(
-                		N25, I25, N50, I50, N75, I75, N90, I90, qmaxmax, qmaxmin, qmaxmax50, qmaxmin50, Nqmaxmax50, Iqmaxmax50, Nqmaxmin50, Iqmaxmin50,
-                		Longest=sapply(N, max), Shortest=sapply(N, min), 
-                		Mean=round(sapply(N, mean)), Median=round(sapply(N, median)),
-                		N_Contigs=sapply(N, length), Total_length=sapply(N, sum)
-                		)
+            N75 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.75 >= 0)[1]]); names(N75) <- names(N)
+            I75 <- sapply(seq(along=N), function(x)         which(Nlcum[[x]] - reflength[x] * 0.75 >= 0)[1] ); names(I75) <- names(N)
 
-				alldata<-do.call(rbind.na, NlTrimCum)
-				#print(names(alldata)); quit()
+            N25 <- sapply(seq(along=N), function(x) Nl[[x]][which(Nlcum[[x]] - reflength[x] * 0.25 >= 0)[1]]); names(N25) <- names(N)
+            I25 <- sapply(seq(along=N), function(x)         which(Nlcum[[x]] - reflength[x] * 0.25 >= 0)[1] ); names(I25) <- names(N)
+            
+            stats <- cbind(
+                    #N25, I25, N50, I50, N75, I75, N90, I90, qmaxmax, qmaxmin, qmaxmax50, qmaxmin50, Nqmaxmax50, Iqmaxmax50, Nqmaxmin50, Iqmaxmin50,
+                    N25, I25, N50, I50, N75, I75, N90, I90, lookup_mean, lookup_mean75, Nlookup_mean75, Ilookup_mean75,
+                    Longest=sapply(N, max), Shortest=sapply(N, min), 
+                    Mean=round(sapply(N, mean)), Median=round(sapply(N, median)),
+                    N_Contigs=sapply(N, length), Total_length=sapply(N, sum)
+                    )
 
-				cat("Contig Number\t" , file="Rplots_cumm.csv", append=FALSE)
-				cat(names(Ns)         , file="Rplots_cumm.csv", append=TRUE , sep="\t" )
-				cat("\n"              , file="Rplots_cumm.csv", append=TRUE )
-				write.table(t(alldata), file="Rplots_cumm.csv", sep="\t", na="\"\"", col.names=FALSE, append=TRUE )
+            alldata<-do.call(rbind.na, NlTrimCum)
+            #print(names(alldata)); quit()
 
-                return(Contig_Stats=list(stats))
+            cat("Contig Number\t" , file=outTsvCumm, append=FALSE)
+            cat(names(Ns)         , file=outTsvCumm, append=TRUE , sep="\t" )
+            cat("\n"              , file=outTsvCumm, append=TRUE )
+            write.table(t(alldata), file=outTsvCumm, sep="\t", na="\"\"", col.names=FALSE, append=TRUE )
+
+            cat("\"Name\"\t",   file=outTsvStat,           append=FALSE)
+            write.table(stats , file=outTsvStat, sep="\t", append=TRUE )
+            
+            return(Contig_Stats=list(stats))
         }
         ## Plot cumulative contig length with base graphics, only necessary when ggplot is unavailable
         if(style=="base") {
+            outPng     = paste(outBaseName, ".png"     , sep="")
+
+            png(filename=outPng, width=2048, height=2048, bg="transparent", type="cairo", pointsize=48)
+
 		    #add tick values every 5th part of the X length
             maxy<-max(unlist(NlTrimCum))
 			maxy<-round(maxy/yunity)*yunity
@@ -217,7 +240,8 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
             for(i in seq(along=NlTrim)) {
                 # TODO: IF I == J50, CHANGE SYMBOL?
                 if(i==1) {
-                    plot(y=NlTrimCum[[i]], x=seq_along(NlTrimCum[[i]]),col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", xlab=xlab, ylab=ylab, main=main, type='o')
+                    plot(y=NlTrimCum[[i]], x=seq_along(NlTrimCum[[i]]),col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", xlab=xlab, ylab=ylab, main=main, type='o', bty="n")
+                    box(lwd=6)
                 }
                 screen(1, new=FALSE)
 
@@ -227,7 +251,12 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
 		    axis(2, at=tickvaluesY, labels=f2si(tickvaluesY))
 
 
-            #if ( doQs ) {
+            legendTxt = paste(names(N50), ":",
+                            " N50=" , fmtnum(N50),
+                            " I50=" , fmtnum(I50),
+                            " Size=", fmtnum(Ns ), sep="")
+                            
+            if ( doLookup ) {
                 axis(3, at=tickvaluesX, labels=f2si(tickvaluesX))
     
                 maxylim=max(ylim)
@@ -236,23 +265,29 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
                 yblock =maxylim/80
                 xblock =maxxlim/350
                 screen(1, new=FALSE)
-                for (nPos in seq(1:length(Iqmaxmax50))) {
+                for (nPos in seq(1:length(Ilookup_mean75))) {
                     #print(paste("pos ", nPos, " I50 ", Iqmaxmax50[nPos], " ylim ", max(ylim), " I50 ", Iqmaxmax50[nPos], " qmax ", qmaxmax50))
                     #segments(Iqmaxmax50[nPos], max(ylim), Iqmaxmax50[nPos], qmaxmax50, col=nPos, lty=5, lwd=3)
                     #segments(Iqmaxmin50[nPos], qmaxmin50, Iqmaxmin50[nPos],         0, col=nPos, lty=5, lwd=3)
-                    rect(Iqmaxmax50[nPos]-xblock, maxylim+(yblock*2), Iqmaxmax50[nPos]+xblock, maxylim+(yblock*3), col=nPos, border=NA)
-                    rect(Iqmaxmin50[nPos]-xblock, minylim-(yblock*3), Iqmaxmin50[nPos]+xblock, minylim-(yblock*2), col=nPos, border=NA)
+                    #rect(Iqmaxmax50[nPos]-xblock, maxylim+(yblock*2), Iqmaxmax50[nPos]+xblock, maxylim+(yblock*3), col=nPos, border=NA)
+                    #rect(Iqmaxmin50[nPos]-xblock, minylim-(yblock*3), Iqmaxmin50[nPos]+xblock, minylim-(yblock*2), col=nPos, border=NA)
+                    rect(Ilookup_mean75Trim[nPos]-xblock, maxylim+(yblock*1), Ilookup_mean75Trim[nPos]+xblock, maxylim+(yblock*3), col=nPos, border=NA)
                 }
 
 
                 #qmaxtxt = bquote(" Mmax50 = " ^ .(qmaxmax50))
-                qmaxtxt = paste(" Mmax50=", fmtnum(qmaxmax50))
-                text(trimSize *.85, qmaxmax50 * 1.05, qmaxtxt)
-                abline(h=qmaxmax50, lty=5, lwd=3)
+                #qmaxtxt = paste(" Mmax50=", fmtnum(qmaxmax50))
+                #text(trimSize *.85, qmaxmax50 * 1.05, qmaxtxt)
+                #abline(h=qmaxmax50, lty=5, lwd=3)
+                #
+                #qmintxt = paste(" Mmin50=", fmtnum(qmaxmin50))
+                #text(trimSize *.85, qmaxmin50 * 0.95, qmintxt)
+                #abline(h=qmaxmin50, lty=5, lwd=3)
 
-                qmintxt = paste(" Mmin50=", fmtnum(qmaxmin50))
-                text(trimSize *.85, qmaxmin50 * 0.95, qmintxt)
-                abline(h=qmaxmin50, lty=5, lwd=3)
+                qmaxtxt = paste("Lookup75=", fmtnum(lookup_mean75), sep="")
+                text(trimSize *.85, lookup_mean75 * 1.05, qmaxtxt)
+                abline(h=lookup_mean75, lty=5, lwd=8)
+
                 
                 #for (seqname in names(N)) {
                 #    print(paste("adding square to name:", seqname))
@@ -263,16 +298,16 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
                 #    rect(q50maxJ, maxy * .20, q50maxJ*1.01, maxy * .19)
                 #}
                 
-                
-            #}
-                   
+                legendTxt = paste(names(N50), ":",
+                            " N50=", fmtnum(N50),
+                            " I50=", fmtnum(I50),
+                            #" Jmin=", fmtnum(Iqmaxmin50), " Jmax=", fmtnum(Iqmaxmax50),
+                            " Nl=", fmtnum(Nlookup_mean75),
+                            " Il=", fmtnum(Ilookup_mean75),
+                            " Size=", fmtnum(Ns), sep="")
+            }
 
-
-            
-            # TODO: FORMAT NUMBERS
-            legend("bottomright", legend=paste(names(N50), ": N50=", fmtnum(N50), " I50=", fmtnum(I50),
-            " Jmin=", fmtnum(Iqmaxmin50), " Jmax=", fmtnum(Iqmaxmax50),
-            " Size=", fmtnum(Ns), sep=""), cex=0.6, bty="n", pch=15, pt.cex=0.8, col=seq(along=Nl), xjust=1 )
+            legend("bottomright", legend=legendTxt, cex=0.75, bty="n", pch=15, pt.cex=1.5, col=seq(along=Nl), xjust=1 )
 
             close.screen(all=TRUE)
         }
@@ -293,9 +328,7 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
 					axis(1, at=tickvalues, labels=f2si(tickvalues))
 					axis(2, at=tickvalues, labels=f2si(tickvalues))
             }
-            legend("bottomright", legend=paste(names(N50), ": N50 = ", N50, " Size = ", Ns, sep=""), cex=0.6, bty="n", pch=15, pt.cex=0.8, col=seq(along=Nl),
-                   xjust=1
-                   )
+            legend("bottomright", legend=paste(names(N50), ": N50 = ", N50, " Size = ", Ns, sep=""), cex=0.6, bty="n", pch=15, pt.cex=0.8, col=seq(along=Nl), xjust=1 )
             close.screen(all=TRUE)
         }
         ## Plot cumulative contig length with ggplot2

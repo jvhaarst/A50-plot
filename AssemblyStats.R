@@ -35,7 +35,7 @@ if (!file.exists(inputFile[1])){
   quit()
 }
 
-cat(paste("reading ", inputFile[1], "\n"))
+cat(paste("reading", inputFile[1], "\n"))
 input<-read.csv(inputFile[1], as.is=TRUE, header=TRUE, blank.lines.skip=TRUE, comment.char="#")
 attach(input)
 inputCols<-ncol(input)
@@ -74,23 +74,24 @@ cat(paste("TOTAL VALID SEQUENCES: ", inputValid, "\n", sep=""))
 cat("Using maximal reference length for N50\n")
 reflength <- sapply(N, sum)
 max_ref <- as.numeric(max(reflength))
-cat(paste("Reference Length ",reflength,"\n"))
-cat(paste("Max Reference Length ",max_ref,"\n"))
+cat(paste("Reference Length",reflength,"\n"))
+cat(paste("Max Reference Length",max_ref,"\n"))
 
 # Create plot and statistics
 # Get table and save it
-stats<-contigStatsFlipped(style="data",N=N, reflength=reflength)
+stats<-contigStatsFlipped(style="data",N=N, reflength=reflength, doLookup=TRUE, outBaseName=inputFile)
 cat("stats\n")
 print(stats)
-cat("\"Name\"\t", file="Rplots_stats.csv",             append=FALSE)
-write.table(stats , file="Rplots_stats.csv", sep="\t", append=TRUE )
+
 
 # Generate graphic
 contigStatsFlipped(style="base",N=N, reflength=reflength, pch=20, xlim=c(0,max_count),
                     trimSize=max_count,
                     xlab="Number of contigs",
                     ylab="Cumulative contig length",
-                    main="Cumulative Plot of A50 Statistic"
+                    main="Cumulative Plot of A50 Statistic",
+                    doLookup=TRUE,
+                    outBaseName=inputFile
 )
 
 quit()
