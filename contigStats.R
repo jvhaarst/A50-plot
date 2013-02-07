@@ -35,8 +35,9 @@
 ## cumulative contig lengths, which is a very effective way for comparing assembly
 ## results.
 
-require("gdata"  , warn.conflicts=FALSE)
-require("sitools", warn.conflicts=FALSE)
+require("gdata"   , warn.conflicts=FALSE)
+require("sitools" , warn.conflicts=FALSE)
+require("plotmath", warn.conflicts=FALSE)
 source('./rbind.na.R')
 
 #contigStats <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, xlim, ylim) {
@@ -93,6 +94,11 @@ source('./rbind.na.R')
 #        }
 #}
 
+
+fmtnum<-function(num){
+    return(formatC(num, format="d", big.mark=","))
+}
+
 contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, trimSize=25000, xunity=1e3, doQs=FALSE, yunity=1e7, xlim, ylim) {
         ## Compute cumulative length vectors for contig sets, trimming at TRIMSIZE
         cat("Trimming histograms\n")
@@ -112,7 +118,10 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
 				return(nN);
 		}); names(NlTrim)    <- names(N)
 
+        numEls<-length(names(N))
 
+        cat(paste("number of elements: ", numEls, "\n"))
+        
 		Nl        <- lapply(names(N), function(x) rev(sort(N[[x]]))  ); names(Nl       ) <- names(N)
         Nlcum     <- lapply(names(N), function(x) cumsum(Nl[[x]])    ); names(Nlcum    ) <- names(N)
         NlTrimCum <- lapply(names(N), function(x) cumsum(NlTrim[[x]])); names(NlTrimCum) <- names(N)
@@ -137,25 +146,28 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
 		cat(paste(     tickvaluesX , "\n"))
 		cat(paste(f2si(tickvaluesX), "\n"))
 
-        
-        #calculate the bigger-minimum (bigger contig) and the smaller-maximum (minimum assembled size)
-        #with that, find the "real" comparative N50 between all assemblies
         qmax<-unlist(lapply(seq(along=Nlcum), function(x) Nlcum[[x]][which.max(abs(Nlcum[[x]]))]))
         #cat(paste("qmax ", qmax, "\n"))
         
+        qmaxmax<-max(qmax)
         qmaxmin<-min(qmax)
+        cat(paste("qmaxmax ", qmaxmax, "\n"))
         cat(paste("qmaxmin ", qmaxmin, "\n"))
         
-        qmin<-unlist(lapply(seq(along=Nlcum), function(x) Nlcum[[x]][which.min(abs(Nlcum[[x]]))]))
-        #cat(paste("qmin ", qmin, "\n"))
+        qmaxmax50<-ceiling( qmaxmax/2 )
+        qmaxmin50<-ceiling( qmaxmin/2 )
+        cat(paste("qmaxmax50 ", qmaxmax50, "\n"))
+        cat(paste("qmaxmin50 ", qmaxmin50, "\n"))
         
-        qminmax<-min(qmin)
-        cat(paste("qminmax ", qminmax, "\n"))
         
-        Q50<-(qmaxmin+qminmax) / 2
-        Q25<-Q50 / 2
-        Q75<-Q50 + Q25
-
+        Nqmaxmax50 <- sapply(seq(along=N), function(x) {Nl[[x]][which(Nlcum[[x]] - qmaxmax50 >= 0)[1]]}); names(Nqmaxmax50) <- names(N)
+        Iqmaxmax50 <- sapply(seq(along=N), function(x) {        which(Nlcum[[x]] - qmaxmax50 >= 0)[1] }); names(Iqmaxmax50) <- names(N)
+        
+        Nqmaxmin50 <- sapply(seq(along=N), function(x) {Nl[[x]][which(Nlcum[[x]] - qmaxmin50 >= 0)[1]]}); names(Nqmaxmin50) <- names(N)
+        Iqmaxmin50 <- sapply(seq(along=N), function(x) {        which(Nlcum[[x]] - qmaxmin50 >= 0)[1] }); names(Iqmaxmin50) <- names(N)
+        
+        cat(paste(names(N), "Nqmaxmax50 ", Nqmaxmax50, " Iqmaxmax50 ", Iqmaxmax50, "\n"))
+        cat(paste(names(N), "Nqmaxmin50 ", Nqmaxmin50, " Iqmaxmin50 ", Iqmaxmin50, "\n"))
         
         ## Return only data (no plot)
         if(style=="data") {
@@ -169,7 +181,7 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
                 I25 <- sapply(seq(along=N), function(x)         which(Nlcum[[x]] - reflength[x] * 0.25 >= 0)[1] ); names(I25) <- names(N)
                 
                 stats <- cbind(
-                		N25, I25, N50, I50, N75, I75, N90, I90,
+                		N25, I25, N50, I50, N75, I75, N90, I90, qmaxmax, qmaxmin, qmaxmax50, qmaxmin50, Nqmaxmax50, Iqmaxmax50, Nqmaxmin50, Iqmaxmin50,
                 		Longest=sapply(N, max), Shortest=sapply(N, min), 
                 		Mean=round(sapply(N, mean)), Median=round(sapply(N, median)),
                 		N_Contigs=sapply(N, length), Total_length=sapply(N, sum)
@@ -186,7 +198,7 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
                 return(Contig_Stats=list(stats))
         }
         ## Plot cumulative contig length with base graphics, only necessary when ggplot is unavailable
-	if(style=="base") {
+        if(style=="base") {
 		    #add tick values every 5th part of the X length
             maxy<-max(unlist(NlTrimCum))
 			maxy<-round(maxy/yunity)*yunity
@@ -198,28 +210,69 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
             cat("Tick values Y\n"    )
             cat(paste(     tickvaluesY , "\n"))
             cat(paste(f2si(tickvaluesY), "\n"))
+            par(mar=c(4,4,5,1)+.1)
             
+            palette(rainbow(numEls))
             split.screen(c(1,1))
             for(i in seq(along=NlTrim)) {
-                    if(i==1) {
-                    	plot(y=NlTrimCum[[i]], x=seq_along(NlTrimCum[[i]]),col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", xlab=xlab, ylab=ylab, main=main, type='o')
-                    }
-                    screen(1, new=FALSE)
-                    plot(y=NlTrimCum[[i]], x=seq_along(NlTrimCum[[i]]),  col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", ylab="", xlab="", main="", bty="n", ann=FALSE, type='o')
+                # TODO: IF I == J50, CHANGE SYMBOL?
+                if(i==1) {
+                    plot(y=NlTrimCum[[i]], x=seq_along(NlTrimCum[[i]]),col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", xlab=xlab, ylab=ylab, main=main, type='o')
+                }
+                screen(1, new=FALSE)
+
+                plot(y=NlTrimCum[[i]], x=seq_along(NlTrimCum[[i]]),  col=i, pch=pch, xlim=xlim, ylim=ylim, xaxt="n", yaxt="n", ylab="", xlab="", main="", bty="n", ann=FALSE, type='o')
             }
 		    axis(1, at=tickvaluesX, labels=f2si(tickvaluesX))
 		    axis(2, at=tickvaluesY, labels=f2si(tickvaluesY))
-            legend("bottomright", legend=paste(names(N50), ": N50=", N50, " I50=", I50," Size=", Ns, sep=""), cex=0.6, bty="n", pch=15, pt.cex=0.8, col=seq(along=Nl),
-                   xjust=1
-                   )
-			
-            if ( doQs ) {
-                abline(h=qminmax)
-                abline(h=Q25    )
-                abline(h=Q50    )
-                abline(h=Q75    )
-                abline(h=qmaxmin)
-            }
+
+
+            #if ( doQs ) {
+                axis(3, at=tickvaluesX, labels=f2si(tickvaluesX))
+    
+                maxylim=max(ylim)
+                minylim=min(ylim)
+                maxxlim=max(xlim)
+                yblock =maxylim/80
+                xblock =maxxlim/350
+                screen(1, new=FALSE)
+                for (nPos in seq(1:length(Iqmaxmax50))) {
+                    #print(paste("pos ", nPos, " I50 ", Iqmaxmax50[nPos], " ylim ", max(ylim), " I50 ", Iqmaxmax50[nPos], " qmax ", qmaxmax50))
+                    #segments(Iqmaxmax50[nPos], max(ylim), Iqmaxmax50[nPos], qmaxmax50, col=nPos, lty=5, lwd=3)
+                    #segments(Iqmaxmin50[nPos], qmaxmin50, Iqmaxmin50[nPos],         0, col=nPos, lty=5, lwd=3)
+                    rect(Iqmaxmax50[nPos]-xblock, maxylim+(yblock*2), Iqmaxmax50[nPos]+xblock, maxylim+(yblock*3), col=nPos, border=NA)
+                    rect(Iqmaxmin50[nPos]-xblock, minylim-(yblock*3), Iqmaxmin50[nPos]+xblock, minylim-(yblock*2), col=nPos, border=NA)
+                }
+
+
+                #qmaxtxt = bquote(" Mmax50 = " ^ .(qmaxmax50))
+                qmaxtxt = paste(" Mmax50=", fmtnum(qmaxmax50))
+                text(trimSize *.85, qmaxmax50 * 1.05, qmaxtxt)
+                abline(h=qmaxmax50, lty=5, lwd=3)
+
+                qmintxt = paste(" Mmin50=", fmtnum(qmaxmin50))
+                text(trimSize *.85, qmaxmin50 * 0.95, qmintxt)
+                abline(h=qmaxmin50, lty=5, lwd=3)
+                
+                #for (seqname in names(N)) {
+                #    print(paste("adding square to name:", seqname))
+                #    q50maxM = Nqmaxmax50[seqname]
+                #    q50maxJ = Iqmaxmax50[seqname]
+                #    print(paste("  M:", q50maxM, " J:",q50maxJ))
+                #   
+                #    rect(q50maxJ, maxy * .20, q50maxJ*1.01, maxy * .19)
+                #}
+                
+                
+            #}
+                   
+
+
+            
+            # TODO: FORMAT NUMBERS
+            legend("bottomright", legend=paste(names(N50), ": N50=", fmtnum(N50), " I50=", fmtnum(I50),
+            " Jmin=", fmtnum(Iqmaxmin50), " Jmax=", fmtnum(Iqmaxmax50),
+            " Size=", fmtnum(Ns), sep=""), cex=0.6, bty="n", pch=15, pt.cex=0.8, col=seq(along=Nl), xjust=1 )
 
             close.screen(all=TRUE)
         }
