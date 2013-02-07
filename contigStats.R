@@ -307,7 +307,7 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
                             " Size=", fmtnum(Ns), sep="")
             }
 
-            legend("bottomright", legend=legendTxt, cex=0.75, bty="n", pch=15, pt.cex=1.5, col=seq(along=Nl), xjust=1 )
+            legend("bottomright", legend=legendTxt, cex=0.65, bty="n", pch=15, pt.cex=1.5, col=seq(along=Nl), xjust=1 )
 
             close.screen(all=TRUE)
         }
