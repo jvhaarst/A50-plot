@@ -85,10 +85,14 @@ print(stats)
 
 
 # Generate graphic
-contigStatsFlipped(style="base",N=N, reflength=reflength, pch=20, xlim=c(0,max_count),
-                    trimSize=max_count,
+contigStatsFlipped( style="base",
+                    N=N,
+                    reflength=reflength,
+                    pch=20,
+                    xlim=c(0,max_count),
                     xlab="Number of contigs",
                     ylab="Cumulative contig length",
+                    trimSize=max_count,
                     main="Cumulative Plot of A50 Statistic",
                     doLookup=TRUE,
                     outBaseName=inputFile

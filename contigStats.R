@@ -37,13 +37,6 @@
 ## cumulative contig lengths, which is a very effective way for comparing assembly
 ## results.
 
-## TODO: SHARE DATA BETWEEN MODES
-
-require("gdata"   , warn.conflicts=FALSE)
-require("sitools" , warn.conflicts=FALSE)
-require("plotmath", warn.conflicts=FALSE)
-source('./rbind.na.R')
-
 #contigStats <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Percentage of Assembly Covered by Contigs of Size >=Y", ylab="Contig Size [bp]", main="Cumulative Length of Contigs", sizetitle=14, sizex=12, sizey=12, sizelegend=9, xlim, ylim) {
 #        ## Compute cumulative length vectors for contig sets
 #        Nl <- lapply(names(N), function(x) rev(sort(N[[x]]))); names(Nl) <- names(N)
@@ -99,7 +92,14 @@ source('./rbind.na.R')
 #}
 
 
-fmtnum<-function(num){
+## TODO: SHARE DATA BETWEEN MODES
+require("plotmath", warn.conflicts=FALSE)
+require("sitools" , warn.conflicts=FALSE)
+require("gdata"   , warn.conflicts=FALSE)
+source('./rbind.na.R')
+
+
+fmtnum<-function(num) {
     fmtNums<-formatC(num, format="d", big.mark=",")
     strmax<-max(unlist(lapply(seq(along=fmtNums), function(x) nchar(fmtNums))))
     fmtNumsP<-formatC(fmtNums, width=strmax)
@@ -111,19 +111,19 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
     cat("Trimming histograms\n")
 
     NlTrim<- lapply(names(N ), function(x) {
-            nN<-rev(sort(N[[x]]))
+        nN<-rev(sort(N[[x]]))
 
-            trimSizel<-trimSize
-            if ( length(nN) < trimSize ) {
-                    cat(paste("reducing trim size to"  , length(nN), "\n"))
-                    trimSizel<-length(nN)-1
-            } else {
-                    cat(paste("keeping trim size. size", length(nN), "\n"))
-            }
-                
-            nN <- trimSum(nN, trimSizel, right=TRUE, na.rm=FALSE)
-
+        trimSizel<-trimSize
+        if ( length(nN) < trimSize ) {
+            cat(paste("reducing trim size to"  , length(nN), "\n"))
             return(nN);
+        } else {
+            cat(paste("keeping trim size. size", length(nN), "\n"))
+        }
+            
+        nN <- trimSum(nN, trimSizel, right=TRUE, na.rm=FALSE)
+
+        return(nN);
     }); names(NlTrim)    <- names(N)
 
     numEls<-length(names(N))
@@ -156,8 +156,9 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
     #find lookup value
     lookup_max<-unlist(lapply(seq(along=Nlcum), function(x) Nlcum[[x]][which.max(abs(Nlcum[[x]]))]))
     lookup_mean<-floor(1/mean(1/lookup_max))
+    
     cat(paste("Nlookup:  ", lookup_mean  , "\n"))
-    lookup_mean75<-floor(lookup_mean * .75)
+    lookup_mean75<-floor(   lookup_mean  * .75)
     cat(paste("Nlookup75:", lookup_mean75, "\n"))
     
     Nlookup_mean75     <- sapply(seq(along=N), function(x) {Nl[[x]][which(Nlcum[[x]] - lookup_mean75 >= 0)[1]]}); names(Nlookup_mean75) <- names(N)
@@ -262,7 +263,8 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
                 rect(Ilookup_mean75Trim[nPos]-xblock, maxylim+(yblock*1), Ilookup_mean75Trim[nPos]+xblock, maxylim+(yblock*3), col=nPos, border=NA)
             }
 
-            qmaxtxt = paste("Lookup=", fmtnum(lookup_mean75), sep="")
+            #qmaxtxt = paste("Lookup=", fmtnum(lookup_mean75), sep="")
+            qmaxtxt = paste("Lookup=", f2si(round(lookup_mean75/yunity, digits=1)*yunity), sep="")
             text(trimSize *.85, lookup_mean75 * 1.05, qmaxtxt)
             abline(h=lookup_mean75, lty=5, lwd=8)
 
@@ -277,7 +279,7 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
             
             #print legend
         op <- par(family="mono", font=2)
-        legend("bottomright", legend=legendTxt, cex=0.55, bty="n", pch=15, pt.cex=1.5, col=seq(along=Nl), xjust=1 )
+        legend("bottomright", legend=legendTxt, cex=0.45, bty="n", pch=15, pt.cex=1.5, y.intersp=.8, col=seq(along=Nl), xjust=1 )
         par(op)
 
         close.screen(all=TRUE)
