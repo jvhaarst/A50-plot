@@ -277,9 +277,28 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
                                 " Size=", fmtnum(Ns), sep="")
         }
             
-            #print legend
+        #print legend
         op <- par(family="mono", font=2)
-        legend("bottomright", legend=legendTxt, cex=0.50, bty="n", pch=15, pt.cex=1, y.intersp=.8, col=seq(along=Nl), xjust=1 )
+
+
+        #acex <- 0.3 + ( 1 / sqrt(strmax) )
+        #acex <- 1-(strmax/140)
+        #acex <- (5-(log10(strmax)^2))/5
+        #acex <- (17-sinh(log10(strmax))^2)/16
+        #a1 <- strmax/(130*1)
+        #b1 <- a1*(pi/2)
+        #acex <- 1-sin(b1)
+        #acex <- .9-sin(b1)+sin(b1/3)
+        #acex <- 0.74367*exp(-0.011*strmax)
+        #acex <- ((0.0000015464*(strmax^3))*-1)+(0.0002515167*(strmax^2))+((0.0154842134*strmax)*-1)+0.8296025387
+        a <- 0.0000368
+        b <- -0.0090173
+        c <- 0.8486444
+        acex <- (a*(strmax^2))+(b*strmax)+c
+        if (acex < 0.2) { acex <- 0.2 }
+        cat(paste("ACEX ", acex , "\n"))
+
+        legend("bottomright", legend=legendTxt, cex=acex, bty="n", pch=15, pt.cex=1, y.intersp=.8, col=seq(along=Nl), xjust=1 )
         par(op)
 
         close.screen(all=TRUE)

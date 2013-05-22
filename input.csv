@@ -2,38 +2,40 @@ Seq_Name,Seq_File
 #allpaths_454,/home/assembly/dev_150/assemblies/allpaths_lg_sample_heinz_raw_with454/sl/data/run/ASSEMBLIES/test/final.assembly.fasta
 #clc,/home/assembly/dev_150/assemblies/clc-default/clc_contigs.fa
 ,
-heinz reference (2.40),/home/assembly/dev_150/assemblies/S_lycopersicum_scaffolds.2.40.fa
-heinz (aplg ill 250+300+500+2k+3k+4k+5k),/home/assembly/dev_150/assemblies/allpaths_lg_sample_heinz_raw/sl/data/run/ASSEMBLIES/test/final.assembly.fasta
+S. lycopersicum cv Heinz (2.40),/home/assembly/dev_150/assemblies/S_lycopersicum_scaffolds.2.40.fa
+S. lycopersicum cv Heinz (aplg ill 250+300+500+2k+3k+4k+5k),/home/assembly/dev_150/assemblies/allpaths_lg_sample_heinz_raw/sl/data/run/ASSEMBLIES/test/final.assembly.fasta
+#S. lycopersicum cv Heinz (aplg ill 250+300+500+2k+3k+4k+5k)+(opera  454 3k+8k+20k),/home/aflit001/nobackup/temptive/opera/heinz/output/scaffoldSeqFmt.fasta
+#S. lycopersicum cv Heinz (aplg ill 250+300+500+2k+3k+4k+5k)+(scarpa 454 3k+8k+20k),/home/aflit001/nobackup/temptive/opera/heinz/output/scaffold_scarpa.fasta
 ,
 ,
 ,
-#habrochaites (aplg ill 170+2k),/home/assembly/dev_150/assemblies/allpaths_lg_habrochaites_raw/sh/data/run/ASSEMBLIES/test/final.assembly.fasta
-#habrochaites (aplg ill 170+2k)+(opera 454 8k+20k),/home/aflit001/temptive/opera/habrochaites/output1/scaffoldSeqFmt.fasta
-#habrochaites (aplg ill 170+2k)+(scarpa 454 8k+20k),/home/aflit001/temptive/opera/habrochaites/output1/scaffold_scarpa.fasta
+#S. habrochaites (aplg ill 170+2k),/home/assembly/dev_150/assemblies/allpaths_lg_habrochaites_raw/sh/data/run/ASSEMBLIES/test/final.assembly.fasta
+#S. habrochaites (aplg ill 170+2k)+(opera  454 8k+20k),/home/aflit001/nobackup/temptive/opera/habrochaites/output1/scaffoldSeqFmt.fasta
+#S. habrochaites (aplg ill 170+2k)+(scarpa 454 8k+20k),/home/aflit001/nobackup/temptive/opera/habrochaites/output1/scaffold_scarpa.fasta
 ,
-habrochaites (aplg ill 170+500+2k),/home/assembly/dev_150/assemblies/allpaths_lg_habrochaites_raw/sh/data/run/ASSEMBLIES/test2/final.assembly.fasta
-#habrochaites (aplg ill 170+500+2k)+(opera 454 8k+20k),/home/aflit001/temptive/opera/habrochaites/output2/scaffoldSeqFmt.fasta
-#habrochaites (aplg ill 170+500+2k)+(scarpa 454 8k+20k),/home/aflit001/temptive/opera/habrochaites/output2/scaffold_scarpa.fasta
-,
-,
-,
-#pennellii (aplg ill 170+2k),/home/assembly/dev_150/assemblies/allpaths_lg_pennellii_raw/sp/data/run/ASSEMBLIES/test/final.assembly.fasta
-#pennellii (aplg ill 170+2k)+(opera 454 3k+8k+20k),/home/aflit001/temptive/opera/pennellii/output1/scaffoldSeqFmt.fasta
-#pennellii (aplg ill 170+2k)+(scarpa 454 3k+8k+20k),/home/aflit001/temptive/opera/pennellii/output1/scaffold_scarpa.fasta
-,
-#pennellii (aplg ill 170+500+2k),/home/assembly/dev_150/assemblies/allpaths_lg_pennellii_raw/sp/data/run/ASSEMBLIES/test2/final.assembly.fasta
-#pennellii (aplg ill 170+500+2k)+(opera 454 3k+8k+20k),/home/aflit001/temptive/opera/pennellii/output/scaffoldSeqFmt.fasta
-#pennellii (aplg ill 170+500+2k)+(scarpa 454 3k+8k+20k),/home/aflit001/temptive/opera/pennellii/output/scaffold_scarpa.fasta
+S. habrochaites (aplg ill 170+500+2k),/home/assembly/dev_150/assemblies/allpaths_lg_habrochaites_raw/sh/data/run/ASSEMBLIES/test2/final.assembly.fasta
+#S. habrochaites (aplg ill 170+500+2k)+(opera  454 8k+20k),/home/aflit001/nobackup/temptive/opera/habrochaites/output2/scaffoldSeqFmt.fasta
+#S. habrochaites (aplg ill 170+500+2k)+(scarpa 454 8k+20k),/home/aflit001/nobackup/temptive/opera/habrochaites/output2/scaffold_scarpa.fasta
 ,
 ,
 ,
-#arcanum (clc ill 170+2k 454 8k+20k) default,/home/assembly/dev_150/assemblies/clc_arcanum/CLC-780MB-tryout1.fa
-#arcanum (clc ill 170+2k 454 8k+20k) non default,/home/assembly/dev_150/assemblies/clc_arcanum/CLC-830MB-tryout2.fa
+#S. pennellii (aplg ill 170+2k),/home/assembly/dev_150/assemblies/allpaths_lg_pennellii_raw/sp/data/run/ASSEMBLIES/test/final.assembly.fasta
+#S. pennellii (aplg ill 170+2k)+(opera  454 3k+8k+20k),/home/aflit001/nobackup/temptive/opera/pennellii/output1/scaffoldSeqFmt.fasta
+#S. pennellii (aplg ill 170+2k)+(scarpa 454 3k+8k+20k),/home/aflit001/nobackup/temptive/opera/pennellii/output1/scaffold_scarpa.fasta
 ,
-#arcanum (aplg ill 170+2k),/home/assembly/dev_150/assemblies/allpaths_lg_sample_arcanum_raw/sa/data/run/ASSEMBLIES/test/final.assembly.fasta
-#arcanum (aplg ill 170+2k)+(opera 454 8k+20k),/home/aflit001/temptive/opera/arcanum/output1/scaffoldSeqFmt.fasta
-#arcanum (aplg ill 170+2k)+(scarpa 454 8k+20k),/home/aflit001/temptive/opera/arcanum/output1/scaffold_scarpa.fasta
+S. pennellii (aplg ill 170+500+2k),/home/assembly/dev_150/assemblies/allpaths_lg_pennellii_raw/sp/data/run/ASSEMBLIES/test2/final.assembly.fasta
+#S. pennellii (aplg ill 170+500+2k)+(opera  454 3k+8k+20k),/home/aflit001/nobackup/temptive/opera/pennellii/output/scaffoldSeqFmt.fasta
+#S. pennellii (aplg ill 170+500+2k)+(scarpa 454 3k+8k+20k),/home/aflit001/nobackup/temptive/opera/pennellii/output/scaffold_scarpa.fasta
 ,
-#arcanum (aplg ill 170+500+2k),/home/assembly/dev_150/assemblies/allpaths_lg_sample_arcanum_raw/sa/data/run/ASSEMBLIES/test2/final.assembly.fasta
-#arcanum (aplg ill 170+500+2k)+(opera 454 8k+20k),/home/aflit001/temptive/opera/arcanum/output2/scaffoldSeqFmt.fasta
-#arcanum (aplg ill 170+500+2k)+(scarpa 454 8k+20k),/home/aflit001/temptive/opera/arcanum/output2/scaffold_scarpa.fasta
+,
+,
+#S. arcanum (clc ill 170+2k 454 8k+20k) default,/home/assembly/dev_150/assemblies/clc_arcanum/CLC-780MB-tryout1.fa
+#S. arcanum (clc ill 170+2k 454 8k+20k) non default,/home/assembly/dev_150/assemblies/clc_arcanum/CLC-830MB-tryout2.fa
+,
+#S. arcanum (aplg ill 170+2k),/home/assembly/dev_150/assemblies/allpaths_lg_sample_arcanum_raw/sa/data/run/ASSEMBLIES/test/final.assembly.fasta
+#S. arcanum (aplg ill 170+2k)+(opera  454 8k+20k),/home/aflit001/nobackup/temptive/opera/arcanum/output1/scaffoldSeqFmt.fasta
+#S. arcanum (aplg ill 170+2k)+(scarpa 454 8k+20k),/home/aflit001/nobackup/temptive/opera/arcanum/output1/scaffold_scarpa.fasta
+,
+S. arcanum (aplg ill 170+500+2k),/home/assembly/dev_150/assemblies/allpaths_lg_sample_arcanum_raw/sa/data/run/ASSEMBLIES/test2/final.assembly.fasta
+#S. arcanum (aplg ill 170+500+2k)+(opera  454 8k+20k),/home/aflit001/nobackup/temptive/opera/arcanum/output2/scaffoldSeqFmt.fasta
+#S. arcanum (aplg ill 170+500+2k)+(scarpa 454 8k+20k),/home/aflit001/nobackup/temptive/opera/arcanum/output2/scaffold_scarpa.fasta
