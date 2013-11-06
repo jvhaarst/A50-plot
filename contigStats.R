@@ -163,7 +163,7 @@ contigStatsFlipped <- function(N=N, reflength, style="ggplot2", pch=20, xlab="Pe
     
     Nlookup_mean75     <- sapply(seq(along=N), function(x) {Nl[[x]][which(Nlcum[[x]] - lookup_mean75 >= 0)[1]]}); names(Nlookup_mean75) <- names(N)
     Ilookup_mean75     <- sapply(seq(along=N), function(x) {        which(Nlcum[[x]] - lookup_mean75 >= 0)[1] }); names(Ilookup_mean75) <- names(N)
-    Ilookup_mean75Trim <- sapply(seq(along=N), function(x) {if ( Ilookup_mean75[x] > trimSize ) { return(trimSize); } else { return(Ilookup_mean75[x]); }} ); names(Ilookup_mean75Trim) <- names(N)
+    Ilookup_mean75Trim <- sapply(seq(along=N), function(x) {if ( (! is.na(Ilookup_mean75[x])) && (Ilookup_mean75[x] > trimSize) ) { return(trimSize); } else { return(Ilookup_mean75[x]); }} ); names(Ilookup_mean75Trim) <- names(N)
     cat(paste(names(N), "Nlookup_mean75", Nlookup_mean75, "Ilookup_mean75", Ilookup_mean75, "\n"))
     print(Ilookup_mean75Trim)
     

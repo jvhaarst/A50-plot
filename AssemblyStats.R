@@ -20,8 +20,8 @@ source('./contigStats.R')
 
 # Function to read fasta files returning a size histogram
 readSeq<-function(filename){
-  #sortedSizes <- sort(width(readDNAStringSet(filename)), decreasing=TRUE) # Rstudio
-  sortedSizes <- sort(width(read.DNAStringSet(filename)), decreasing=TRUE) # Command line
+  sortedSizes <- sort(width(readDNAStringSet(filename)), decreasing=TRUE) # Rstudio
+  #sortedSizes <- sort(width(read.DNAStringSet(filename)), decreasing=TRUE) # Command line
   return(sortedSizes)
 }
 

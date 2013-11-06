@@ -1,5 +1,5 @@
 #!/bin/bash
-INFILE=input.csv
+INFILE=$1
 rm $INFILE.* 2>/dev/null
 
 Rscript AssemblyStats.R $INFILE
