@@ -12,8 +12,9 @@ import locale
 locale.setlocale(locale.LC_ALL, '') # empty string for platform's default setting
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 # Global variables
+max_contigs=250000
 assemblies = {}
-outfile='assemblies.png' # Leave empty if you want to use the interactive output instead of a file.
+outfile="assemblies_%i.png" %  max_contigs # Leave empty if you want to use the interactive output instead of a file.
 
 # Class definitions
 class Assembly:
@@ -50,6 +51,17 @@ class Assembly:
 			# Count the number of sequences larger than 1000
 			if (size >=1000):
 				self.counter_over_1000 += 1
+	def print_stats(self):
+		print "Name:%s"		% self.name
+		print "Count: %s"	% format(self.count , "n")
+		print "Sum:%s"		% format(self.sum, "n")
+		print "Max:%s"		% format(self.max, "n")
+		print "Min:%s"		% format(self.min, "n")
+		print "Average:%s"	% format(self.average, "n")
+		print "Median:%s" 	% format(self.median, "n")
+		print "N50:%s"		% format(self.N50, "n")
+		print "L50:%s"		% format(self.L50, "n")
+		print "Count > 1000:%s" % format(self.counter_over_1000, "n")
 
 # Check for what kind of input we get
 # Starts with ">" and is a single entry : 1 file
@@ -76,24 +88,17 @@ if (len(sys.argv) > 2):
 	for input_file in sys.argv[1:]:
 		assemblies[input_file] = Assembly(input_file,input_file)
 
-# TODO : print the statistics as below for each Assembly object.
-# print "Count: %s"	%	format(len(sizes), "n")
-# print "Sum:%s"		%	format(total_length, "n")
-# print "Max:%s"		%	format(max(sizes), "n")
-# print "Min:%s"		%	format(min(sizes), "n")
-# print "Average:%s"	%	format(sum(sizes)/len(sizes), "n")
-# print "Median:%d" 	%	sizes[int(len(sizes)/2)]
-# print "N50:%s" % format(size, "n")
-# print "L50:%s" % format(index+1, "n")
-# print "Count > 1000:%s" % format(counter_over_1000, "n")
+
 
 # Now plot the A50 plots.
 for name, assembly in assemblies.iteritems():
+	assembly.print_stats()
 	pylab.plot(assembly.incremental_sizes, label=name)
 pylab.title("A50 plot" )
 pylab.xlabel("Sequence count")
 pylab.ylabel("Incremental size (bp)")
 pylab.legend(loc='best')
+pylab.xlim([0,max_contigs])
 if (outfile != ''):
 	pylab.savefig(outfile)
 else:
