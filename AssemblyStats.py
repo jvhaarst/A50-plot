@@ -13,6 +13,7 @@ locale.setlocale(locale.LC_ALL, '') # empty string for platform's default settin
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 # Global variables
 max_contigs=250000
+min_length=0 # Set to zero to inore
 assemblies = {}
 outfile="assemblies_%i.png" %  max_contigs # Leave empty if you want to use the interactive output instead of a file.
 
@@ -22,16 +23,22 @@ class Assembly:
 	def __init__(self, name, filename):
 		self.name = name
 		self.filename = filename
+		self.sizes=[]
 		sys.stderr.write("Reading in %s\n" % self.filename)
 		# For each contig/scaffold, calculate length, and sort large to small
-		self.sizes = [len(rec) for rec in SeqIO.parse(open(self.filename ), "fasta")]
+		for rec in SeqIO.parse(open(self.filename ), "fasta"):
+		    if (len(rec) >= min_length):
+			self.sizes.append(len(rec))
+		    else:
+			if (min_length == 0):
+			    self.sizes.append(len(rec))
 		self.sizes.sort(reverse=True)
 		# Calculate all the statistics we can already do
 		self.total_length	= sum(self.sizes)
-		self.count 			= len(self.sizes)
-		self.sum			= self.total_length
-		self.max 			= max(self.sizes)
-		self.min 			= min(self.sizes)
+		self.count 		= len(self.sizes)
+		self.sum		= self.total_length
+		self.max 		= max(self.sizes)
+		self.min 		= min(self.sizes)
 		self.average 		= sum(self.sizes)/len(self.sizes)
 		self.median 		= self.sizes[int(len(self.sizes)/2)]
 		# Store the first number on the size list as the first of the incremental list
@@ -63,7 +70,7 @@ class Assembly:
 		print "L50:%s"		% format(self.L50, "n")
 		print "Count > 1000:%s" % format(self.counter_over_1000, "n")
 
-# Check for what kind of input we get
+# Check what kind of input we get
 # Starts with ">" and is a single entry : 1 file
 # Starts with ">" and there are more entries : multiple files
 # Doesn't start with ">" : csv with 1 or more entries.
@@ -87,8 +94,6 @@ if (len(sys.argv) > 2):
 	# Multiple files, for now assume they are all valid FASTA
 	for input_file in sys.argv[1:]:
 		assemblies[input_file] = Assembly(input_file,input_file)
-
-
 
 # Now plot the A50 plots.
 for name, assembly in assemblies.iteritems():
