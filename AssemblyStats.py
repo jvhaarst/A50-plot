@@ -12,8 +12,8 @@ import locale
 locale.setlocale(locale.LC_ALL, '')  # empty string for platform's default setting
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 # Global variables
-max_contigs = 000000  # Set to zero to inore
-min_length = 200  # Set to zero to inore
+max_contigs = 0  # Set to zero to ignore
+min_length = 200  # Set to zero to ignore
 assemblies = {}
 outfile = "assemblies_%i.png" % max_contigs  # Leave empty if you want to use the interactive output instead of a file.
 
