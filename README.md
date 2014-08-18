@@ -34,3 +34,10 @@ A line is drawn showing the lookup value (Nl). In the top of the graph tick mark
 The result of the script looks like this :
 
 <img src="https://raw.github.com/jvhaarst/A50-plot/master/input.csv.png" href="https://raw.github.com/jvhaarst/A50-plot/master/input.csv.png"/>
+
+INSTALL R DEPENDENCIES:
+#if not root:
+export R_LIBS="~/R" #add this to ~/.bashrc if necessary
+#all
+cat install.R | R --no-save
+
