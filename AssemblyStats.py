@@ -7,7 +7,7 @@ import sys
 import pylab
 
 # Global variables
-max_contigs = 60000  # Set to zero to ignore
+max_contigs = 0000  # Set to zero to ignore
 min_length = 200  # Set to zero to ignore
 DPI = 800
 assemblies = {}
