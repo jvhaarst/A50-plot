@@ -1,27 +1,35 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # This scripts calculates some genome statistitics, and generates a so called A50 plot.
 # Needed modules
 from __future__ import division
 import csv
 import sys
 import pylab
-from Bio import SeqIO
-from itertools import islice
-# For prettyprinting the numbers
-import locale
-locale.setlocale(locale.LC_ALL, '')  # empty string for platform's default setting
-locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+
 # Global variables
-max_contigs = 0  # Set to zero to ignore
+max_contigs = 60000  # Set to zero to ignore
 min_length = 200  # Set to zero to ignore
 assemblies = {}
 outfile = "assemblies_%i.png" % max_contigs  # Leave empty if you want to use the interactive output instead of a file.
+#outfile=''
 
+# http://stackoverflow.com/questions/9157314/python-write-data-into-csv-format-as-string-not-file
+def csv2string(data):
+    import csv
+    from StringIO import StringIO
+    si = StringIO()
+    cw = csv.writer(si)
+    cw.writerow(data)
+    return si.getvalue().strip('\r\n')
 
 # Class definitions
 class Assembly:
     """Class to hold the assembly information, and perform the calculations"""
     def __init__(self, name, filename):
+        # from __future__ import division
+        from itertools import islice
+        from Bio import SeqIO
+        import sys
         self.name = name
         self.filename = filename
         self.sizes = []
@@ -60,7 +68,25 @@ class Assembly:
             if (size >= 1000):
                 self.counter_over_1000 += 1
 
+    def return_stats(self):
+        line = list()
+        line.append(self.name)
+        line.append(self.count)
+        line.append(self.sum)
+        line.append(self.max)
+        line.append(self.min)
+        line.append(self.average)
+        line.append(self.median)
+        line.append(self.N50)
+        line.append(self.L50)
+        line.append(self.counter_over_1000)
+        return line
+
     def print_stats(self):
+        # For prettyprinting the numbers
+        import locale
+        locale.setlocale(locale.LC_ALL, '')  # empty string for platform's default setting
+        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
         print "Name:%s" % self.name
         print "Count:%s" % format(self.count, "n")
         print "Sum:%s" % format(self.sum, "n")
@@ -97,11 +123,13 @@ if (len(sys.argv) > 2):
     for input_file in sys.argv[1:]:
         assemblies[input_file] = Assembly(input_file, input_file)
 
-# Now plot the A50 plots.
-for name, assembly in assemblies.iteritems():
-    assembly.print_stats()
-    pylab.plot(assembly.incremental_sizes, label=name)
-pylab.title("A50 plot")
+# Now plot the A50 plots and print the stats
+print csv2string(["Name","Count","Sum","Max","Min","Average","Median","N50","L50","Count > 1000"])
+for name, assembly in iter(sorted(assemblies.items())):
+    print(csv2string(assembly.return_stats()))
+    line = pylab.plot(assembly.incremental_sizes, label=name)
+
+pylab.title("A50 plot of contigs >"+str(min_length)+"bp")
 pylab.xlabel("Sequence count")
 pylab.ylabel("Incremental size (bp)")
 pylab.legend(loc='best')
