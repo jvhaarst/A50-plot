@@ -9,6 +9,7 @@ import pylab
 # Global variables
 max_contigs = 60000  # Set to zero to ignore
 min_length = 200  # Set to zero to ignore
+DPI = 800
 assemblies = {}
 outfile = "assemblies_%i.png" % max_contigs  # Leave empty if you want to use the interactive output instead of a file.
 #outfile=''
@@ -136,6 +137,6 @@ pylab.legend(loc='best')
 if (max_contigs > 0):
     pylab.xlim([0, max_contigs])
 if (outfile != ''):
-    pylab.savefig(outfile)
+    pylab.savefig(outfile,dpi = (DPI))
 else:
     pylab.show()
