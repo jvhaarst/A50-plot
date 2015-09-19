@@ -56,6 +56,10 @@ class Assembly:
         self.incremental_sizes.append(self.sizes[0])
         self.N50 = 0
         self.L50 = 0
+        self.N90 = 0
+        self.L90 = 0
+        self.N95 = 0
+        self.L95 = 0
         self.counter_over_1000 = 1 if (self.incremental_sizes[-1] > 1000) else 0
         # Now iterate over the sizes list, and incrementally add it to the incremental list
         for index, size in enumerate(islice(self.sizes, 1, None)):
@@ -65,6 +69,14 @@ class Assembly:
                 self.N50 = size
                 # We need to add one to the index because we started to loop at 1, not 0
                 self.L50 = index + 1
+            if (self.incremental_sizes[-1] > self.total_length * 0.90) and (self.N90 == 0):
+                self.N90 = size
+                # We need to add one to the index because we started to loop at 1, not 0
+                self.L90 = index + 1
+            if (self.incremental_sizes[-1] > self.total_length * 0.95) and (self.N95 == 0):
+                self.N95 = size
+                # We need to add one to the index because we started to loop at 1, not 0
+                self.L95 = index + 1
             # Count the number of sequences larger than 1000
             if (size >= 1000):
                 self.counter_over_1000 += 1
@@ -80,6 +92,10 @@ class Assembly:
         line.append(self.median)
         line.append(self.N50)
         line.append(self.L50)
+        line.append(self.N90)
+        line.append(self.L90)
+        line.append(self.N95)
+        line.append(self.L95)
         line.append(self.counter_over_1000)
         return line
 
@@ -97,6 +113,10 @@ class Assembly:
         print "Median:%s" % format(self.median, "n")
         print "N50:%s" % format(self.N50, "n")
         print "L50:%s" % format(self.L50, "n")
+        print "N90:%s" % format(self.N90, "n")
+        print "L90:%s" % format(self.L90, "n")
+        print "N95:%s" % format(self.N95, "n")
+        print "L95:%s" % format(self.L95, "n")
         print "Count > 1000:%s" % format(self.counter_over_1000, "n")
 
 # Check what kind of input we get
@@ -126,7 +146,7 @@ if (len(sys.argv) > 2):
         assemblies[input_file] = Assembly(input_file, input_file)
 
 # Now plot the A50 plots and print the stats
-print csv2string(["Name","Count","Sum","Max","Min","Average","Median","N50","L50","Count > 1000"])
+print csv2string(["Name","Count","Sum","Max","Min","Average","Median","N50","L50","N90","L90","N95","L95","Count > 1000"])
 for name, assembly in iter(sorted(assemblies.items())):
     print(csv2string(assembly.return_stats()))
     line = pylab.plot(assembly.incremental_sizes, label=name)
