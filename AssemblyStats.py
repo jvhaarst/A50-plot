@@ -114,7 +114,8 @@ if (len(sys.argv) == 2):
         assemblies[input_file] = Assembly(input_file, input_file)
     else:  # We assume a valid CSV file, put the values in the assemblies dict
         file_name = sys.argv[1]
-        csv_file = csv.DictReader(open(file_name, 'rb'), delimiter=',', quotechar='"')
+	fp = open(file_name, 'rb')
+        csv_file = csv.DictReader((row for row in fp if not row.startswith('#')), delimiter=',', quotechar='"')
         for row in csv_file:
             input_name = row['Seq_Name']
             input_file = row['Seq_File']
