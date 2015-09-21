@@ -14,8 +14,9 @@ min_length = 200  # Set to zero to ignore
 expected_genome_size = 0 # 0.350e9
 
 DPI = 300
+TITLE = ''
 assemblies = {}
-outfile = "assemblies_%i.png" % max_contigs  # Leave empty if you want to use the interactive output instead of a file.
+outfile = "assemblies_%i_%s.png" % (max_contigs,TITLE)  # Leave empty if you want to use the interactive output instead of a file.
 #outfile=''
 
 # Colors to cycle through
@@ -192,6 +193,7 @@ for name, assembly in iter(sorted(assemblies.items())):
     line = pylab.plot(assembly.incremental_sizes, label=name,color=next(colors))
 
 pylab.title("A50 plot of contigs >"+str(min_length)+"bp")
+if (TITLE != '') : pylab.suptitle(TITLE, fontsize=20)
 pylab.xlabel("Sequence count")
 pylab.ylabel("Incremental size (bp)")
 pylab.legend(loc='best')
