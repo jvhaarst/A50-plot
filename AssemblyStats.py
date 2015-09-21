@@ -5,6 +5,7 @@ from __future__ import division
 import csv
 import sys
 import pylab
+import itertools
 
 # Global variables
 max_contigs = 0000  # Set to zero to ignore
@@ -13,6 +14,24 @@ DPI = 300
 assemblies = {}
 outfile = "assemblies_%i.png" % max_contigs  # Leave empty if you want to use the interactive output instead of a file.
 #outfile=''
+
+# Colors to cycle through
+# http://colorbrewer2.org/?type=qualitative&scheme=Paired&n=12
+# http://stackoverflow.com/questions/12236566/setting-different-color-for-each-series-in-scatter-plot-on-matplotlib
+colors = itertools.cycle([
+    '#1f78b4',
+    '#e31a1c',
+    '#33a02c',
+    '#ff7f00',
+    '#a6cee3',
+    '#fb9a99',
+    '#b2df8a',
+    '#fdbf6f',
+    '#cab2d6',
+    '#6a3d9a',
+    '#ffff99',
+    '#b15928'
+    ])
 
 # http://stackoverflow.com/questions/9157314/python-write-data-into-csv-format-as-string-not-file
 def csv2string(data):
@@ -149,7 +168,7 @@ if (len(sys.argv) > 2):
 print csv2string(["Name","Count","Sum","Max","Min","Average","Median","N50","L50","N90","L90","N95","L95","Count > 1000"])
 for name, assembly in iter(sorted(assemblies.items())):
     print(csv2string(assembly.return_stats()))
-    line = pylab.plot(assembly.incremental_sizes, label=name)
+    line = pylab.plot(assembly.incremental_sizes, label=name,color=next(colors))
 
 pylab.title("A50 plot of contigs >"+str(min_length)+"bp")
 pylab.xlabel("Sequence count")
