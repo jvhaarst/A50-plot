@@ -4,20 +4,37 @@
 from __future__ import division
 import csv
 import sys
-import pylab
+import time
 import itertools
+import matplotlib
+matplotlib.use('cairo') # Remove if using interactively (no outfile below)
+matplotlib.use('Agg') # Remove if using interactively (no outfile below)
+import pylab
+
+# Handle compressed files
+# From http://stackoverflow.com/a/26986344/194447
+import gzip
+import bz2
+
+def open_by_suffix(filename):
+    if filename.endswith('.gz'):
+        return gzip.open(filename, 'rb')
+    elif filename.endswith('.bz2'):
+        return bz2.BZ2file(filename, 'r')
+    else:
+        return open(filename, 'r')
 
 # Global variables
 max_contigs = 0000  # Set to zero to ignore
-min_length = 200  # Set to zero to ignore
+min_length = 100  # Set to zero to ignore
 # Set the expected genome size in order to calculate the NG50, if zero, ignore
 expected_genome_size = 0 # 0.350e9
 
 DPI = 300
-TITLE = ''
+TITLE = time.strftime("%Y%m%d")
 assemblies = {}
-outfile = "assemblies_%i_%s.png" % (max_contigs,TITLE)  # Leave empty if you want to use the interactive output instead of a file.
-#outfile=''
+outfile = "assemblies_%i_%i_%s.png" % (min_length,max_contigs,TITLE)  # Leave empty if you want to use the interactive output instead of a file.
+#outfile='' # Also outcomment/remove matplotlib.use above
 
 # Colors to cycle through
 # Adapted from http://colorbrewer2.org/?type=qualitative&scheme=Paired&n=12
@@ -59,13 +76,15 @@ class Assembly:
         self.min_length=min_length
         self.sizes = []
         sys.stderr.write("Reading in %s\n" % self.filename)
-        # For each contig/scaffold, calculate length, and sort large to small
-        for rec in SeqIO.parse(open(self.filename), "fasta"):
-            if (len(rec) >= self.min_length):
-                self.sizes.append(len(rec))
-            else:
-                if (self.min_length == 0):
+        # Open handle to be able to use file
+        with open_by_suffix(self.filename) as handle:
+            # For each contig/scaffold, calculate length, and sort large to small
+            for rec in SeqIO.parse(handle, "fasta"):
+                if (len(rec) >= self.min_length):
                     self.sizes.append(len(rec))
+                else:
+                    if (self.min_length == 0):
+                        self.sizes.append(len(rec))
         self.sizes.sort(reverse=True)
         # Calculate all the statistics we can already do
         self.total_length = sum(self.sizes)
@@ -90,6 +109,7 @@ class Assembly:
         self.N95 = 0
         self.L95 = 0
         self.counter_over_1000 = 1 if (self.incremental_sizes[-1] > 1000) else 0
+        self.counter_over_10000 = 1 if (self.incremental_sizes[-1] > 10000) else 0
         # Now iterate over the sizes list, and incrementally add it to the incremental list
         for index, size in enumerate(islice(self.sizes, 1, None)):
             self.incremental_sizes.append(self.incremental_sizes[-1] + size)
@@ -117,6 +137,9 @@ class Assembly:
             # Count the number of sequences larger than 1000
             if (size >= 1000):
                 self.counter_over_1000 += 1
+            # Count the number of sequences larger than 1000
+            if (size >= 10000):
+                self.counter_over_10000 += 1
 
     def return_stats(self):
         line = list()
@@ -136,6 +159,7 @@ class Assembly:
         line.append(self.N95)
         line.append(self.L95)
         line.append(self.counter_over_1000)
+        line.append(self.counter_over_10000)
         return line
 
     def print_stats(self):
@@ -159,6 +183,7 @@ class Assembly:
         print "N95:%s" % format(self.N95, "n")
         print "L95:%s" % format(self.L95, "n")
         print "Count > 1000:%s" % format(self.counter_over_1000, "n")
+        print "Count > 10000:%s" % format(self.counter_over_10000, "n")
 
 # Check what kind of input we get
 # Starts with ">" and is a single entry : 1 file
@@ -168,7 +193,7 @@ if (len(sys.argv) == 1):
     sys.exit()
 if (len(sys.argv) == 2):
     # Single file, now check if the input is a FASTA formatted file
-    with open(sys.argv[1], 'r') as f:
+    with open_by_suffix(sys.argv[1]) as f:
         first_line = f.readline()
     if (first_line[0] == '>'):  # We got a single FASTA file
         input_file = sys.argv[1]
@@ -187,7 +212,7 @@ if (len(sys.argv) > 2):
         assemblies[input_file] = Assembly(input_file, input_file,min_length)
 
 # Now plot the A50 plots and print the stats
-print csv2string(["Name","Count","Sum","Max","Min","Average","Median","N50","L50","NG50","LG50","N90","L90","N95","L95","Count > 1000"])
+print csv2string(["Name","Count","Sum","Max","Min","Average","Median","N50","L50","NG50","LG50","N90","L90","N95","L95","Count>1000","Count>10000"])
 for name, assembly in iter(sorted(assemblies.items())):
     print(csv2string(assembly.return_stats()))
     line = pylab.plot(assembly.incremental_sizes, label=name,color=next(colors))
@@ -200,6 +225,7 @@ pylab.legend(loc='best')
 if (max_contigs > 0):
     pylab.xlim([0, max_contigs])
 if (outfile != ''):
+    sys.stderr.write("Writing %s\n" % outfile)
     pylab.savefig(outfile,dpi = (DPI))
 else:
     pylab.show()
