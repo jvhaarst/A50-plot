@@ -25,7 +25,7 @@ def open_by_suffix(filename):
         return open(filename, 'r')
 
 # Global variables
-max_contigs = 0000  # Set to zero to ignore
+max_contigs = 150000  # Set to zero to ignore
 min_length = 100  # Set to zero to ignore
 # Set the expected genome size in order to calculate the NG50, if zero, ignore
 expected_genome_size = 0 # 0.350e9
@@ -66,6 +66,14 @@ def csv2string(data):
 # Class definitions
 class Assembly:
     """Class to hold the assembly information, and perform the calculations"""
+    def count_gc(test,seq):
+        gc = sum(seq.count(x) for x in ['G', 'C', 'g', 'c', 'S', 's']) 
+        return gc
+
+    def count_n(test,seq):
+        n = sum(seq.count(x) for x in ['N', 'n']) 
+        return n
+
     def __init__(self, name, filename,min_length):
         # from __future__ import division
         from itertools import islice
@@ -75,16 +83,19 @@ class Assembly:
         self.filename = filename
         self.min_length=min_length
         self.sizes = []
+        self.gc = []
+        self.n = []
         sys.stderr.write("Reading in %s\n" % self.filename)
         # Open handle to be able to use file
         with open_by_suffix(self.filename) as handle:
             # For each contig/scaffold, calculate length, and sort large to small
+            # Also count the GC and N content per contig
             for rec in SeqIO.parse(handle, "fasta"):
                 if (len(rec) >= self.min_length):
                     self.sizes.append(len(rec))
-                else:
-                    if (self.min_length == 0):
-                        self.sizes.append(len(rec))
+                    self.gc.append(self.count_gc(rec.seq))
+                    self.n.append(self.count_n(rec.seq))
+
         self.sizes.sort(reverse=True)
         # Calculate all the statistics we can already do
         self.total_length = sum(self.sizes)
@@ -97,6 +108,8 @@ class Assembly:
             raise
         self.average = sum(self.sizes) / len(self.sizes)
         self.median = self.sizes[int(len(self.sizes) / 2)]
+        self.gc_content = sum(self.gc) * 100 /self.sum
+        self.n_content = sum(self.n) * 100 /self.sum
         # Store the first number on the size list as the first of the incremental list
         self.incremental_sizes = []
         self.incremental_sizes.append(self.sizes[0])
@@ -160,6 +173,8 @@ class Assembly:
         line.append(self.L95)
         line.append(self.counter_over_1000)
         line.append(self.counter_over_10000)
+        line.append(self.gc_content)
+        line.append(self.n_content)
         return line
 
     def print_stats(self):
@@ -184,6 +199,8 @@ class Assembly:
         print "L95:%s" % format(self.L95, "n")
         print "Count > 1000:%s" % format(self.counter_over_1000, "n")
         print "Count > 10000:%s" % format(self.counter_over_10000, "n")
+        print "GC percentage:%s" % format(self.gc_content, "n")
+        print "N percentage:%s" % format(self.n_content, "n")
 
 # Check what kind of input we get
 # Starts with ">" and is a single entry : 1 file
@@ -212,7 +229,7 @@ if (len(sys.argv) > 2):
         assemblies[input_file] = Assembly(input_file, input_file,min_length)
 
 # Now plot the A50 plots and print the stats
-print csv2string(["Name","Count","Sum","Max","Min","Average","Median","N50","L50","NG50","LG50","N90","L90","N95","L95","Count>1000","Count>10000"])
+print csv2string(["Name","Count","Sum","Max","Min","Average","Median","N50","L50","NG50","LG50","N90","L90","N95","L95","Count>1000","Count>10000","GC","N"])
 for name, assembly in iter(sorted(assemblies.items())):
     print(csv2string(assembly.return_stats()))
     line = pylab.plot(assembly.incremental_sizes, label=name,color=next(colors))
