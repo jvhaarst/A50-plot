@@ -1,20 +1,28 @@
 #!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 # This scripts calculates some genome statistitics, and generates a so called A50 plot.
+# pylint: disable=line-too-long
+# pylint: disable=invalid-name
+# pylint: disable=no-member
+# pylint: disable=E0401,E1101,C0111
 # Needed modules
-from __future__ import division
+from __future__ import division, print_function
+import os
 import csv
 import sys
 import time
 import itertools
-import matplotlib
-matplotlib.use('cairo') # Remove if using interactively (no outfile below)
-matplotlib.use('Agg') # Remove if using interactively (no outfile below)
-import pylab
 
 # Handle compressed files
 # From http://stackoverflow.com/a/26986344/194447
 import gzip
 import bz2
+
+# Graphing stuff
+import matplotlib
+matplotlib.use('cairo') # Remove if using interactively (no outfile below)
+matplotlib.use('Agg') # Remove if using interactively (no outfile below)
+import pylab
 
 def open_by_suffix(filename):
     if filename.endswith('.gz'):
@@ -25,15 +33,15 @@ def open_by_suffix(filename):
         return open(filename, 'r')
 
 # Global variables
-max_contigs = 150000  # Set to zero to ignore
-min_length = 100  # Set to zero to ignore
+max_contigs = int(os.getenv('MAX_CONTIGS', 10000))  # Set to zero to ignore
+min_length = int(os.getenv('MIN_LENGTH', 100))  # Set to zero to ignore
 # Set the expected genome size in order to calculate the NG50, if zero, ignore
-expected_genome_size = 0 # 0.350e9
+expected_genome_size = int(os.getenv('EXPECTED_GENOME_SIZE', 0)) # 0.350e9
 
 DPI = 300
-TITLE = time.strftime("%Y%m%d")
+TITLE = os.getenv('TITLE', time.strftime("%Y%m%d"))
 assemblies = {}
-outfile = "assemblies_%i_%i_%s.png" % (min_length,max_contigs,TITLE)  # Leave empty if you want to use the interactive output instead of a file.
+outfile = "assemblies_%i_%i_%s.png" % (min_length, max_contigs, TITLE)  # Leave empty if you want to use the interactive output instead of a file.
 #outfile='' # Also outcomment/remove matplotlib.use above
 
 # Colors to cycle through
@@ -54,6 +62,9 @@ colors = itertools.cycle([
     '#b15928'
     ])
 
+# http://stackoverflow.com/questions/4995733/how-to-create-a-spinning-command-line-cursor-using-python
+spinner = itertools.cycle(['—', '\\', '|', '/'])
+
 # http://stackoverflow.com/questions/9157314/python-write-data-into-csv-format-as-string-not-file
 def csv2string(data):
     import csv
@@ -66,22 +77,24 @@ def csv2string(data):
 # Class definitions
 class Assembly:
     """Class to hold the assembly information, and perform the calculations"""
-    def count_gc(test,seq):
-        gc = sum(seq.count(x) for x in ['G', 'C', 'g', 'c', 'S', 's']) 
+    @classmethod
+    def count_gc(cls, seq):
+        gc = sum(seq.count(x) for x in ['G', 'C', 'g', 'c', 'S', 's'])
         return gc
 
-    def count_n(test,seq):
-        n = sum(seq.count(x) for x in ['N', 'n']) 
+    @classmethod
+    def count_n(cls, seq):
+        n = sum(seq.count(x) for x in ['N', 'n'])
         return n
 
-    def __init__(self, name, filename,min_length):
+    def __init__(self, name, filename, min_length):
         # from __future__ import division
         from itertools import islice
         from Bio import SeqIO
         import sys
         self.name = name
         self.filename = filename
-        self.min_length=min_length
+        self.min_length = min_length
         self.sizes = []
         self.gc = []
         self.n = []
@@ -91,11 +104,16 @@ class Assembly:
             # For each contig/scaffold, calculate length, and sort large to small
             # Also count the GC and N content per contig
             for rec in SeqIO.parse(handle, "fasta"):
-                if (len(rec) >= self.min_length):
+                # Spinner
+                sys.stderr.write(spinner.next())
+                sys.stderr.flush()
+                if len(rec) >= self.min_length:
                     self.sizes.append(len(rec))
                     self.gc.append(self.count_gc(rec.seq))
                     self.n.append(self.count_n(rec.seq))
-
+                # Spinner
+                sys.stderr.write('\b')
+        sys.stderr.write("\n")
         self.sizes.sort(reverse=True)
         # Calculate all the statistics we can already do
         self.total_length = sum(self.sizes)
@@ -109,7 +127,9 @@ class Assembly:
         self.average = sum(self.sizes) / len(self.sizes)
         self.median = self.sizes[int(len(self.sizes) / 2)]
         self.gc_content = sum(self.gc) * 100 /self.sum
+        self.gc_sum = sum(self.gc)
         self.n_content = sum(self.n) * 100 /self.sum
+        self.n_sum = sum(self.n)
         # Store the first number on the size list as the first of the incremental list
         self.incremental_sizes = []
         self.incremental_sizes.append(self.sizes[0])
@@ -127,7 +147,7 @@ class Assembly:
         for index, size in enumerate(islice(self.sizes, 1, None)):
             self.incremental_sizes.append(self.incremental_sizes[-1] + size)
             # While we iterate over the array, we can gather NG50, N50, LG50 and the L50 when we reach half of the total assembly
-            if (expected_genome_size != 0):
+            if expected_genome_size != 0:
                 if (self.incremental_sizes[-1] > expected_genome_size / 2) and (self.NG50 == 0):
                     self.NG50 = size
                     # We need to add one to the index because we started to loop at 1, not 0
@@ -148,10 +168,10 @@ class Assembly:
                 # We need to add one to the index because we started to loop at 1, not 0
                 self.L95 = index + 1
             # Count the number of sequences larger than 1000
-            if (size >= 1000):
+            if size >= 1000:
                 self.counter_over_1000 += 1
             # Count the number of sequences larger than 1000
-            if (size >= 10000):
+            if size >= 10000:
                 self.counter_over_10000 += 1
 
     def return_stats(self):
@@ -173,7 +193,9 @@ class Assembly:
         line.append(self.L95)
         line.append(self.counter_over_1000)
         line.append(self.counter_over_10000)
+        line.append(self.gc_sum)
         line.append(self.gc_content)
+        line.append(self.n_sum)
         line.append(self.n_content)
         return line
 
@@ -182,67 +204,71 @@ class Assembly:
         import locale
         locale.setlocale(locale.LC_ALL, '')  # empty string for platform's default setting
         locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-        print "Name:%s" % self.name
-        print "Count:%s" % format(self.count, "n")
-        print "Sum:%s" % format(self.sum, "n")
-        print "Max:%s" % format(self.max, "n")
-        print "Min:%s" % format(self.min, "n")
-        print "Average:%s" % format(self.average, "n")
-        print "Median:%s" % format(self.median, "n")
-        print "N50:%s" % format(self.N50, "n")
-        print "L50:%s" % format(self.L50, "n")
-        print "NG50:%s" % format(self.NG50, "n")
-        print "LG50:%s" % format(self.LG50, "n")
-        print "N90:%s" % format(self.N90, "n")
-        print "L90:%s" % format(self.L90, "n")
-        print "N95:%s" % format(self.N95, "n")
-        print "L95:%s" % format(self.L95, "n")
-        print "Count > 1000:%s" % format(self.counter_over_1000, "n")
-        print "Count > 10000:%s" % format(self.counter_over_10000, "n")
-        print "GC percentage:%s" % format(self.gc_content, "n")
-        print "N percentage:%s" % format(self.n_content, "n")
+        print("Name:%s") % self.name
+        print("Count:%s") % format(self.count, "n")
+        print("Sum:%s") % format(self.sum, "n")
+        print("Max:%s") % format(self.max, "n")
+        print("Min:%s") % format(self.min, "n")
+        print("Average:%s") % format(self.average, "n")
+        print("Median:%s") % format(self.median, "n")
+        print("N50:%s") % format(self.N50, "n")
+        print("L50:%s") % format(self.L50, "n")
+        print("NG50:%s") % format(self.NG50, "n")
+        print("LG50:%s") % format(self.LG50, "n")
+        print("N90:%s") % format(self.N90, "n")
+        print("L90:%s") % format(self.L90, "n")
+        print("N95:%s") % format(self.N95, "n")
+        print("L95:%s") % format(self.L95, "n")
+        print("Count > 1000:%s") % format(self.counter_over_1000, "n")
+        print("Count > 10000:%s") % format(self.counter_over_10000, "n")
+        print("#GC:%s") % format(self.gc_sum, "n")
+        print("GC percentage:%s") % format(self.gc_content, "n")
+        print("#N:%s") % format(self.n_sum, "n")
+        print("N percentage:%s") % format(self.n_content, "n")
 
 # Check what kind of input we get
 # Starts with ">" and is a single entry : 1 file
 # Starts with ">" and there are more entries : multiple files
 # Doesn't start with ">" : csv with 1 or more entries.
-if (len(sys.argv) == 1):
+if len(sys.argv) == 1:
     sys.exit()
-if (len(sys.argv) == 2):
+if len(sys.argv) == 2:
     # Single file, now check if the input is a FASTA formatted file
     with open_by_suffix(sys.argv[1]) as f:
         first_line = f.readline()
-    if (first_line[0] == '>'):  # We got a single FASTA file
+    if first_line[0] == '>':  # We got a single FASTA file
         input_file = sys.argv[1]
-        assemblies[input_file] = Assembly(input_file, input_file,min_length)
+        assemblies[input_file] = Assembly(input_file, input_file, min_length)
     else:  # We assume a valid CSV file, put the values in the assemblies dict
         file_name = sys.argv[1]
-	fp = open(file_name, 'rb')
+        fp = open(file_name, 'rb')
         csv_file = csv.DictReader((row for row in fp if not row.startswith('#')), delimiter=',', quotechar='"')
         for row in csv_file:
             input_name = row['Seq_Name']
             input_file = row['Seq_File']
-            assemblies[input_name] = Assembly(input_name, input_file,min_length)
-if (len(sys.argv) > 2):
+            assemblies[input_name] = Assembly(input_name, input_file, min_length)
+if len(sys.argv) > 2:
     # Multiple files, for now assume they are all valid FASTA
     for input_file in sys.argv[1:]:
-        assemblies[input_file] = Assembly(input_file, input_file,min_length)
+        assemblies[input_file] = Assembly(input_file, input_file, min_length)
 
 # Now plot the A50 plots and print the stats
-print csv2string(["Name","Count","Sum","Max","Min","Average","Median","N50","L50","NG50","LG50","N90","L90","N95","L95","Count>1000","Count>10000","GC","N"])
+print(csv2string(["Name", "Count", "Sum", "Max", "Min", "Average", "Median", "N50", "L50", "NG50", "LG50", "N90", "L90", "N95", "L95", "Count>1000", "Count>10000", "#GC", "GC", "#N", "N"]))
 for name, assembly in iter(sorted(assemblies.items())):
     print(csv2string(assembly.return_stats()))
-    line = pylab.plot(assembly.incremental_sizes, label=name,color=next(colors))
+    color = next(colors)
+    line = pylab.plot(assembly.incremental_sizes, label=name, color=color)
+    #line = pylab.plot(assembly.sizes, label=name+' sizes', color=color)
 
 pylab.title("A50 plot of contigs >"+str(min_length)+"bp")
-if (TITLE != '') : pylab.suptitle(TITLE, fontsize=20)
+if TITLE != '': pylab.suptitle(TITLE, fontsize=20)
 pylab.xlabel("Sequence count")
 pylab.ylabel("Incremental size (bp)")
 pylab.legend(loc='best')
-if (max_contigs > 0):
+if max_contigs > 0:
     pylab.xlim([0, max_contigs])
-if (outfile != ''):
+if outfile != '':
     sys.stderr.write("Writing %s\n" % outfile)
-    pylab.savefig(outfile,dpi = (DPI))
+    pylab.savefig(outfile, dpi=(DPI))
 else:
     pylab.show()
