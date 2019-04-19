@@ -255,13 +255,14 @@ if len(sys.argv) > 2:
         assemblies[input_file] = Assembly(input_file, input_file, min_length)
 
 # Now plot the A50 plots and print the stats
-fig=plt.figure(dpi=DPI);
+fig=plt.figure(dpi=DPI)
 #A4
 fig.set_size_inches(11.69,8.27)
 fig.set_size_inches(8.27,11.69)
 #A3
 fig.set_size_inches(16.53,11.69)
 fig.set_size_inches(11.69,16.53)
+
 if TITLE != '': plt.suptitle(TITLE+"\nA50 plot of "+TYPE+" >"+str(min_length)+"bp", fontsize=20)
 
 plt.subplot(2,1,1)
