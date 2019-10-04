@@ -1,10 +1,16 @@
-These R scripts create metrics and graphs from genome assemblies.
+These Python scripts create metrics and graphs from genome assemblies.
 
-To use, first install the dependancies with `R CMD BATCH install.R`.
+To use, first install the dependancies with `conda install biopython matplotlib`.
 After that, edit the `input.csv` file to match your situation.
 Then you can run the image and stats generating script with:
 
-Rscript AssemblyStats.R input.csv
+`python AssemblyStats.py input.fasta`
+or
+
+`python AssemblyStats.py input.fasta input.fasta.gz input.fasta.bz2`
+or
+
+`python AssemblyStats.py input.csv`
 
 
 
@@ -12,32 +18,43 @@ The CSV (comma separated) columns are:
 Seq_Name Seq_File
 
 Spaces are allowed.
-The order in the file will define the order in the graphics' legend.
+The order in the file will define the order in the graphics legend.
 You can comment lines with #
 First line HAS to be the title:
-Seq_Name,Seq_File
+`Seq_Name,Seq_File`
 
+To change the output of the graph, one can set a couple of environment values.
+These are :
+```
+MAX_CONTIGS
+MIN_LENGTH
+TITLE
+TYPE
+EXPECTED_GENOME_SIZE
+```
 
-You can edit AssemblyStats.R to change the maximum X limit (number of contigs):
-max_count <- 20000
-Any assembly with more than 20000 contigs will be trimmed to this size and the total sum after this will be shown as 20001.
+So an example looks like this :
+```
+export TITLE="103"
+export MAX_CONTIGS=4000
+export MIN_LENGTH=100
+python ~/A50-plot/AssemblyStats.py 103_assemblies.csv > 103.stats
+```
+To parse the output to human readable, one can use this :
+`
+cat 103.stats | tr ',' '\t' | numfmt --header --field 2-5,7-18,20 --grouping | numfmt --header --field 6,19,21 --format '%.1f' | column -t`
 
-We have defined a new concept called "lookup value" which is defined as 75% of the harmonic mean of the sequences sizes. Once this values is set, the Nlookup (contig size) and Ilookup (contig index) is calculate for each sequence. Having the harmonic mean among all sizes as a constant lookup value seems more comparable than using 50% of the length of each assembly individualy (N50).
-E.G.: assemblies size: 1Mbp, 10Mbp, 20Mbp
-Hmean = 1 / (( 1/1M + 1/10M + 1/20M ) / 3) =  2.6Mbp
-Mean  =      (   1M +   10M +   20M ) / 3) = 10.3Mbp
+This then results in:
 
-Harmonic means, usually, gives a lower value than the Mean, allowing the better analysis of discrepant values easier.
-For this dataset, the lookup value would be 75% of 2.6Mbp (1.95Mbp). This fixed value will be used to calculate Nl and Il for the tree individuals.
-A line is drawn showing the lookup value (Nl). In the top of the graph tick marks shows the Il. The legend has the values numerically.
+```
+Name                      Count  Sum            Max         Min  Average   Median  N50         L50  NG50  LG50  N90        L90  N95        L95  Count>1000  Count>10000  #GC            GC    #N     N
+103/assembly.fasta        3,467  3,002,559,922  53,397,245  104  866039.8  6,152   10,128,795  77   0     0     2,373,600  302  1,366,482  382  2,897       1,327        1,045,685,741  34.9  5,100  0.1
+103_final/assembly.fasta  3,636  3,006,248,922  40,557,336  104  826801.2  5,803   11,571,573  76   0     0     2,427,154  296  1,406,690  374  3,019       1,323        1,047,101,522  34.9  4,800  0.1
+103_pbont/assembly.fasta  3,547  3,007,150,960  38,923,932  100  847801.3  5,785   11,975,311  76   0     0     2,910,579  273  1,394,760  344  2,870       1,297        1,047,384,588  34.9  5,500  0.1
 
-The result of the script looks like this :
+```
+As I had not entered the expected genome size, the NG50 and LG50 are zero.
+
+The image  output of the script looks like this :
 
 <img src="https://raw.github.com/jvhaarst/A50-plot/master/input.csv.png" href="https://raw.github.com/jvhaarst/A50-plot/master/input.csv.png"/>
-
-INSTALL R DEPENDENCIES:
-#if not root:
-export R_LIBS="~/R" #add this to ~/.bashrc if necessary
-#all
-cat install.R | R --no-save
-

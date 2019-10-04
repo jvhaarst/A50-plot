@@ -22,7 +22,7 @@ import bz2
 import matplotlib
 matplotlib.use('cairo') # Remove if using interactively (no outfile below)
 matplotlib.use('Agg') # Remove if using interactively (no outfile below)
-import pylab
+import matplotlib.pyplot as plt
 
 def open_by_suffix(filename):
     if filename.endswith('.gz'):
@@ -49,7 +49,7 @@ outfile = "assemblies_%i_%i_%s.png" % (min_length, max_contigs, TITLE)  # Leave 
 # Colors to cycle through
 # Adapted from http://colorbrewer2.org/?type=qualitative&scheme=Paired&n=12
 # Usage from http://stackoverflow.com/questions/12236566/setting-different-color-for-each-series-in-scatter-plot-on-matplotlib
-colors = itertools.cycle([
+color_definition = [
     '#1f78b4',
     '#e31a1c',
     '#33a02c',
@@ -62,7 +62,7 @@ colors = itertools.cycle([
     '#6a3d9a',
     '#ffff99',
     '#b15928'
-    ])
+    ]
 
 # http://stackoverflow.com/questions/4995733/how-to-create-a-spinning-command-line-cursor-using-python
 spinner = itertools.cycle(['—', '\\', '|', '/'])
@@ -255,22 +255,47 @@ if len(sys.argv) > 2:
         assemblies[input_file] = Assembly(input_file, input_file, min_length)
 
 # Now plot the A50 plots and print the stats
+fig=plt.figure(dpi=DPI)
+#A4
+fig.set_size_inches(11.69,8.27)
+fig.set_size_inches(8.27,11.69)
+#A3
+fig.set_size_inches(16.53,11.69)
+fig.set_size_inches(11.69,16.53)
+
+if TITLE != '': plt.suptitle(TITLE+"\nA50 plot of "+TYPE+" >"+str(min_length)+"bp", fontsize=20)
+
+plt.subplot(2,1,1)
+colors=itertools.cycle(color_definition)
 print(csv2string(["Name", "Count", "Sum", "Max", "Min", "Average", "Median", "N50", "L50", "NG50", "LG50", "N90", "L90", "N95", "L95", "Count>1000", "Count>10000", "#GC", "GC", "#N", "N"]))
 for name, assembly in iter(sorted(assemblies.items())):
     print(csv2string(assembly.return_stats()))
     color = next(colors)
     line = pylab.plot(assembly.incremental_sizes_cumulative, label=name, color=color)
     #line = pylab.plot(assembly.sizes, label=name+' sizes', color=color)
-
-pylab.title("A50 plot of "+TYPE+" >"+str(min_length)+"bp")
-if TITLE != '': pylab.suptitle(TITLE, fontsize=20)
-pylab.xlabel("Sequence count")
-pylab.ylabel("Incremental size (bp)")
-pylab.legend(loc='lower right')
+    #line = plt.plot(assembly.incremental_sizes, label=name, color=color)
+plt.xlabel("Sequence count")
+plt.ylabel("Incremental size (bp)")
+plt.legend(loc='lower right')
 if max_contigs > 0:
-    pylab.xlim([0, max_contigs])
+    plt.xlim([0, max_contigs])
+
+plt.subplot(2,1,2)
+colors=itertools.cycle(color_definition)
+for name, assembly in iter(sorted(assemblies.items())):
+    color = next(colors)
+    line = plt.plot(assembly.incremental_sizes,assembly.sizes, label=name, color=color)
+plt.xlabel("Incremental size (bp)")
+plt.ylabel(TYPE+" size (bp)")
+plt.legend(loc='upper right')
+if max_contigs > 0:
+    plt.xlim([0, assembly.incremental_sizes[max_contigs]])
+
+plt.tight_layout()
+fig.subplots_adjust(top=0.8)
+
 if outfile != '':
     sys.stderr.write("Writing %s\n" % outfile)
-    pylab.savefig(outfile, dpi=(DPI))
+    plt.savefig(outfile, dpi=(DPI))
 else:
-    pylab.show()
+    plt.show()
