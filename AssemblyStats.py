@@ -133,8 +133,8 @@ class Assembly:
         self.n_content = sum(self.n) * 100 /self.sum
         self.n_sum = sum(self.n)
         # Store the first number on the size list as the first of the incremental list
-        self.incremental_sizes = []
-        self.incremental_sizes.append(self.sizes[0])
+        self.incremental_sizes_cumulative = []
+        self.incremental_sizes_cumulative.append(self.sizes[0])
         self.NG50 = 0
         self.LG50 = 0
         self.N50 = 0
@@ -143,29 +143,29 @@ class Assembly:
         self.L90 = 0
         self.N95 = 0
         self.L95 = 0
-        self.counter_over_1000 = 1 if (self.incremental_sizes[-1] > 1000) else 0
-        self.counter_over_10000 = 1 if (self.incremental_sizes[-1] > 10000) else 0
+        self.counter_over_1000 = 1 if (self.incremental_sizes_cumulative[-1] > 1000) else 0
+        self.counter_over_10000 = 1 if (self.incremental_sizes_cumulative[-1] > 10000) else 0
         # Now iterate over the sizes list, and incrementally add it to the incremental list
         for index, size in enumerate(islice(self.sizes, 1, None)):
-            self.incremental_sizes.append(self.incremental_sizes[-1] + size)
+            self.incremental_sizes_cumulative.append(self.incremental_sizes_cumulative[-1] + size)
             # While we iterate over the array, we can gather NG50, N50, LG50 and the L50 when we reach half of the total assembly
             if expected_genome_size != 0:
-                if (self.incremental_sizes[-1] > expected_genome_size / 2) and (self.NG50 == 0):
+                if (self.incremental_sizes_cumulative[-1] > expected_genome_size / 2) and (self.NG50 == 0):
                     self.NG50 = size
                     # We need to add one to the index because we started to loop at 1, not 0
                     self.LG50 = index + 1
             else:
                 self.NG50 = 0
                 self.LG50 = 0
-            if (self.incremental_sizes[-1] > self.total_length / 2) and (self.N50 == 0):
+            if (self.incremental_sizes_cumulative[-1] > self.total_length / 2) and (self.N50 == 0):
                 self.N50 = size
                 # We need to add one to the index because we started to loop at 1, not 0
                 self.L50 = index + 1
-            if (self.incremental_sizes[-1] > self.total_length * 0.90) and (self.N90 == 0):
+            if (self.incremental_sizes_cumulative[-1] > self.total_length * 0.90) and (self.N90 == 0):
                 self.N90 = size
                 # We need to add one to the index because we started to loop at 1, not 0
                 self.L90 = index + 1
-            if (self.incremental_sizes[-1] > self.total_length * 0.95) and (self.N95 == 0):
+            if (self.incremental_sizes_cumulative[-1] > self.total_length * 0.95) and (self.N95 == 0):
                 self.N95 = size
                 # We need to add one to the index because we started to loop at 1, not 0
                 self.L95 = index + 1
@@ -259,7 +259,7 @@ print(csv2string(["Name", "Count", "Sum", "Max", "Min", "Average", "Median", "N5
 for name, assembly in iter(sorted(assemblies.items())):
     print(csv2string(assembly.return_stats()))
     color = next(colors)
-    line = pylab.plot(assembly.incremental_sizes, label=name, color=color)
+    line = pylab.plot(assembly.incremental_sizes_cumulative, label=name, color=color)
     #line = pylab.plot(assembly.sizes, label=name+' sizes', color=color)
 
 pylab.title("A50 plot of "+TYPE+" >"+str(min_length)+"bp")
