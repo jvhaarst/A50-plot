@@ -289,7 +289,7 @@ plt.ylabel(TYPE+" size (bp)")
 plt.legend(loc='upper right')
 if max_contigs > 0:
     if len(assembly.incremental_sizes_cumulative) < max_contigs: max_contigs = len(assembly.incremental_sizes_cumulative)-1
-    plt.xlim([0, assembly.incremental_sizes[max_contigs]])
+    plt.xlim([0, assembly.incremental_sizes_cumulative[max_contigs]])
 
 plt.tight_layout()
 fig.subplots_adjust(top=0.8)
