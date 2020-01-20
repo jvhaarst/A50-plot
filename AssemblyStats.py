@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # This scripts calculates some genome statistitics, and generates a so called A50 plot.
 # pylint: disable=line-too-long
@@ -6,7 +6,6 @@
 # pylint: disable=no-member
 # pylint: disable=E0401,E1101,C0111
 # Needed modules
-from __future__ import division, print_function
 import os
 import csv
 import sys
@@ -33,7 +32,7 @@ def open_by_suffix(filename):
         return open(filename, 'r')
 
 # Global variables
-max_contigs = int(os.getenv('MAX_CONTIGS', 10000))  # Set to zero to ignore
+max_contigs = int(os.getenv('MAX_CONTIGS', 0000))  # Set to zero to ignore
 min_length = int(os.getenv('MIN_LENGTH', 100))  # Set to zero to ignore
 # Set the expected genome size in order to calculate the NG50, if zero, ignore
 expected_genome_size = int(os.getenv('EXPECTED_GENOME_SIZE', 0)) # 0.350e9
@@ -70,7 +69,7 @@ spinner = itertools.cycle(['—', '\\', '|', '/'])
 # http://stackoverflow.com/questions/9157314/python-write-data-into-csv-format-as-string-not-file
 def csv2string(data):
     import csv
-    from StringIO import StringIO
+    from io import StringIO
     si = StringIO()
     cw = csv.writer(si)
     cw.writerow(data)
@@ -107,7 +106,7 @@ class Assembly:
             # Also count the GC and N content per contig
             for rec in SeqIO.parse(handle, "fasta"):
                 # Spinner
-                sys.stderr.write(spinner.next())
+                sys.stderr.write(next(spinner))
                 sys.stderr.flush()
                 if len(rec) >= self.min_length:
                     self.sizes.append(len(rec))
@@ -243,7 +242,7 @@ if len(sys.argv) == 2:
         assemblies[input_file] = Assembly(input_file, input_file, min_length)
     else:  # We assume a valid CSV file, put the values in the assemblies dict
         file_name = sys.argv[1]
-        fp = open(file_name, 'rb')
+        fp = open(file_name, 'r')
         csv_file = csv.DictReader((row for row in fp if not row.startswith('#')), delimiter=',', quotechar='"')
         for row in csv_file:
             input_name = row['Seq_Name']
@@ -271,7 +270,7 @@ print(csv2string(["Name", "Count", "Sum", "Max", "Min", "Average", "Median", "N5
 for name, assembly in iter(sorted(assemblies.items())):
     print(csv2string(assembly.return_stats()))
     color = next(colors)
-    line = pylab.plot(assembly.incremental_sizes_cumulative, label=name, color=color)
+    line = plt.plot(assembly.incremental_sizes_cumulative, label=name, color=color)
     #line = pylab.plot(assembly.sizes, label=name+' sizes', color=color)
     #line = plt.plot(assembly.incremental_sizes, label=name, color=color)
 plt.xlabel("Sequence count")
@@ -284,11 +283,12 @@ plt.subplot(2,1,2)
 colors=itertools.cycle(color_definition)
 for name, assembly in iter(sorted(assemblies.items())):
     color = next(colors)
-    line = plt.plot(assembly.incremental_sizes,assembly.sizes, label=name, color=color)
+    line = plt.plot(assembly.incremental_sizes_cumulative,assembly.sizes, label=name, color=color)
 plt.xlabel("Incremental size (bp)")
 plt.ylabel(TYPE+" size (bp)")
 plt.legend(loc='upper right')
 if max_contigs > 0:
+    if len(assembly.incremental_sizes_cumulative) < max_contigs: max_contigs = len(assembly.incremental_sizes_cumulative)-1
     plt.xlim([0, assembly.incremental_sizes[max_contigs]])
 
 plt.tight_layout()
